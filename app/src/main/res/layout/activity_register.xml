@@ -9,22 +9,6 @@
     tools:context=".RegisterActivity">
 
 
-    <TextView
-        android:id="@+id/register_text"
-        android:layout_width="272dp"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif"
-        android:text="Sign up"
-        android:textAlignment="center"
-        android:textAllCaps="true"
-        android:textColor="@color/colorAccent"
-        android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@+id/profile_picture_register"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <EditText
         android:id="@+id/email_register"
         android:layout_width="272dp"
@@ -112,7 +96,7 @@
         style="@style/Base.TextAppearance.AppCompat.Widget.Button.Colored"
         android:layout_width="272dp"
         android:layout_height="47dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="24dp"
         android:background="@drawable/btn_stroke"
         android:text="Sign up"
         android:textColor="@color/colorAccent"
@@ -132,11 +116,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/register_text" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/capture_button"
-        android:layout_width="166dp"
+        android:layout_width="100dp"
         android:layout_height="29dp"
         android:background="@drawable/btn_stroke"
         android:text="Capture"
@@ -147,6 +131,19 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/profile_picture_register" />
+
+    <ProgressBar
+        android:id="@+id/ProgressBarReg"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/password_register_confirm"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/password_register" />
 
 
 </android.support.constraint.ConstraintLayout>

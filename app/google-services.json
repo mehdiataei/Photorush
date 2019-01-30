@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "911265370930",
+    "firebase_url": "https://photorush-560bc.firebaseio.com",
+    "project_id": "photorush-560bc",
+    "storage_bucket": "photorush-560bc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:911265370930:android:ec705a22b6190513",
+        "android_client_info": {
+          "package_name": "io.github.mehdiataei.photorush"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "911265370930-sf2eill4nu7ie7lvclab6m6q0v4jbca5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "io.github.mehdiataei.photorush",
+            "certificate_hash": "7d9b3411793137d5f69e88dd07cc55db01d1ae02"
+          }
+        },
+        {
+          "client_id": "911265370930-97j3ps5oo4893o4ouo7q307v4m2o2k71.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAH91erExEeqthb_fVckCSFgkECnWg2scQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "911265370930-97j3ps5oo4893o4ouo7q307v4m2o2k71.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

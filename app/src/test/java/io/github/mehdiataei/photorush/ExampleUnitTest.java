@@ -1,4 +1,4 @@
-package io.github.mehdiataei.assignment1;
+package io.github.mehdiataei.photorush;
 
 import org.junit.Test;
 

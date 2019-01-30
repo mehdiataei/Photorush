@@ -1,4 +1,4 @@
-package io.github.mehdiataei.assignment1;
+package io.github.mehdiataei.photorush;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("io.github.mehdiataei.assignment1", appContext.getPackageName());
+        assertEquals("io.github.mehdiataei.photorush", appContext.getPackageName());
     }
 }
