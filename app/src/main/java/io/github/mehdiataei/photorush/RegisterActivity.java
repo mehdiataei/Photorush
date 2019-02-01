@@ -15,10 +15,18 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -36,7 +44,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText inputPassword;
     private EditText inputPasswordConfirm;
     private EditText inputShortBio;
-    private String email, username, password;
+    private String email, username, password, bio, userID;
     private Button signupButton;
     private ProgressBar mProgressBar;
 
@@ -50,7 +58,15 @@ public class RegisterActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseMethods firebaseMethods;
+    private StorageReference mStorageRef;
 
+    private static final String USERNAME_KEY = "username";
+    private static final String EMAIL_KEY = "email";
+    private static final String BIO_KEY = "bio";
+    private static final String USERID_KEY = "user_id";
+
+
+    FirebaseFirestore db;
 
     private static final Pattern PASSWORD_PATTERN =
             Pattern.compile("^" +
@@ -60,7 +76,7 @@ public class RegisterActivity extends AppCompatActivity {
                     "(?=.*[a-zA-Z])" +      //any letter
                     //"(?=.*[@#$%^&+=])" +    //at least 1 special character
                     //"(?=\\S+$)" +           //no white spaces
-                    ".{4,}" +               //at least 4 characters
+                    ".{6,}" +               //at least 4 characters
                     "$");
 
 
@@ -189,6 +205,8 @@ public class RegisterActivity extends AppCompatActivity {
         inputPasswordConfirm = findViewById(R.id.password_register_confirm);
         inputShortBio = findViewById(R.id.shortBio_register);
         mProgressBar.setVisibility(View.GONE);
+        db = FirebaseFirestore.getInstance();
+
 
     }
 
@@ -368,6 +386,7 @@ public class RegisterActivity extends AppCompatActivity {
     private void setupFirebaseAuth() {
         Log.d(TAG, "setupFirebaseAuth: setting up firebase auth.");
 
+        mStorageRef = FirebaseStorage.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
 
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -378,6 +397,7 @@ public class RegisterActivity extends AppCompatActivity {
                 if (user != null) {
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+
                 } else {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
@@ -395,11 +415,15 @@ public class RegisterActivity extends AppCompatActivity {
                 email = inputEmail.getText().toString();
                 password = inputPassword.getText().toString();
                 username = inputUsername.getText().toString();
+                bio = inputShortBio.getText().toString();
 
                 if (confirmAllInputs()) {
                     Log.d(TAG, "onClick: registering user");
                     mProgressBar.setVisibility(View.VISIBLE);
                     firebaseMethods.registerNewEmail(email, password, username);
+                    userID = firebaseMethods.getUserID();
+                    addNewUser(username, email, bio, userID);
+
                 }
             }
         });
@@ -417,6 +441,36 @@ public class RegisterActivity extends AppCompatActivity {
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
         }
+    }
+
+
+    /*
+    ------------------------------------ Database ---------------------------------------------
+     */
+    private void addNewUser(String username, String email, String bio, String userID) {
+        Map<String, Object> newUser = new HashMap<>();
+        newUser.put(USERNAME_KEY, username);
+        newUser.put(EMAIL_KEY, email);
+        newUser.put(BIO_KEY, bio);
+        newUser.put(USERID_KEY, userID);
+        db.collection("Users").document(userID).set(newUser)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot added");
+
+
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                        Log.w(TAG, "Error adding document", e);
+
+
+                    }
+                });
     }
 
 }

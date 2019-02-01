@@ -29,6 +29,7 @@ public class FirebaseMethods {
         mAuth = FirebaseAuth.getInstance();
         mContext = context;
 
+
         if (mAuth.getCurrentUser() != null) {
             userID = mAuth.getCurrentUser().getUid();
         }
@@ -62,5 +63,10 @@ public class FirebaseMethods {
 
                     }
                 });
+    }
+
+
+    public String getUserID() {
+        return userID;
     }
 }
