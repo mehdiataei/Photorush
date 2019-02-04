@@ -6,7 +6,12 @@ import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,22 +27,31 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-public class HomeActivity extends AppCompatActivity {
+import io.github.mehdiataei.photorush.Utils.MyRecyclerViewAdapter;
+
+public class HomeActivity extends AppCompatActivity implements MyRecyclerViewAdapter.ItemClickListener {
 
 
     private static final String TAG = "HomeActivity";
     private static final int ACTIVITY_NUM = 0;
-    Bitmap profPic;
-    ImageView profilePic;
-    TextView usernameText, bioText;
-    String userID;
-    Bundle bundle;
+    private Bitmap profPic;
+    private ImageView profilePic;
+    private TextView usernameText, bioText;
+    private String userID;
+    private Bundle bundle;
+    private MyRecyclerViewAdapter adapter;
 
-    FirebaseFirestore db;
+    private static final int NUM_OF_COLUMNS = 3;
+
+
+    private FirebaseFirestore db;
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private StorageReference mStorageRef;
+
+    ImageButton logoutButton;
+    Button uploadButton;
 
 
     @Override
@@ -49,23 +63,20 @@ public class HomeActivity extends AppCompatActivity {
         usernameText = findViewById(R.id.username_text);
         bioText = findViewById(R.id.shortBio_profile);
 
+        logoutButton = findViewById(R.id.logout_button);
+
         db = FirebaseFirestore.getInstance();
-
-
-//
-
-
-//
-//        boolean profilePic_taken = getIntent().getExtras().getBoolean("profile pic taken");
-//
-//        if (profilePic_taken) {
-
-//            profilePic.setImageBitmap(profPic);
-//        }
 
         setupFirebaseAuth();
 
     }
+
+    @Override
+    public void onItemClick(View view, int position) {
+        Log.i("TAG", "You clicked number " + adapter.getItem(position) + ", which is at cell position " + position);
+    }
+
+
 
     /**
      * Firebase Auth setup
@@ -89,9 +100,24 @@ public class HomeActivity extends AppCompatActivity {
                 if (user != null) {
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                    setLogoutButton();
                     userID = user.getUid();
-                    readSingleUser();
                     setUserThumbnail();
+                    readSingleUser();
+                    // data to populate the RecyclerView with
+
+                    //Bitmap[] data = new Bitmap[]{profPic, profPic};
+
+                    Bitmap bitmap1 = BitmapFactory.decodeResource(getResources(), R.drawable.thumbnail);//assign your bitmap;
+                    Bitmap[] data = {bitmap1, bitmap1, bitmap1, bitmap1, bitmap1, bitmap1, bitmap1, bitmap1, bitmap1, bitmap1, bitmap1, bitmap1, bitmap1, bitmap1, bitmap1, bitmap1, bitmap1, bitmap1, bitmap1, bitmap1, bitmap1, bitmap1, bitmap1};
+
+                    // set up the RecyclerView
+                    RecyclerView recyclerView = findViewById(R.id.rvNumbers);
+                    recyclerView.setLayoutManager(new GridLayoutManager(HomeActivity.this, NUM_OF_COLUMNS));
+                    adapter = new MyRecyclerViewAdapter(HomeActivity.this, data);
+                    adapter.setClickListener(HomeActivity.this);
+                    recyclerView.setAdapter(adapter);
+
                 } else {
 
                     finish();
@@ -173,6 +199,21 @@ public class HomeActivity extends AppCompatActivity {
                 // Handle any errors
             }
         });
+    }
+
+    private void setLogoutButton() {
+
+
+        logoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                FirebaseAuth.getInstance().signOut();
+                //finish();
+
+            }
+        });
+
     }
 
 }

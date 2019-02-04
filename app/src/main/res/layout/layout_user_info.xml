@@ -2,7 +2,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="150dp"
         android:layout_alignParentTop="true">
 
         <LinearLayout
@@ -16,8 +16,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="35"
-                android:layout_marginStart="25dp"
-                android:layout_marginTop="50dp">
+                android:layout_marginStart="20dp">
 
                 <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/profile_picture"
@@ -40,7 +39,8 @@
                     android:id="@+id/shortBio_profile"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="70dp"
+                    android:textSize="20sp"
+                    android:layout_marginTop="30dp"
                     android:layout_marginRight="20dp">
 
                 </TextView>
