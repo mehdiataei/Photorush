@@ -3,6 +3,7 @@ package io.github.mehdiataei.photorush;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,7 +28,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import io.github.mehdiataei.photorush.Utils.MyRecyclerViewAdapter;
+
+import static io.github.mehdiataei.photorush.RegisterActivity.REQUEST_IMAGE_CAPTURE;
 
 public class HomeActivity extends AppCompatActivity implements MyRecyclerViewAdapter.ItemClickListener {
 
@@ -215,6 +219,35 @@ public class HomeActivity extends AppCompatActivity implements MyRecyclerViewAda
         });
 
     }
+
+
+//    /*
+//------------------------------------ Camera ---------------------------------------------
+// */
+//    private void dispatchTakePictureIntent() {
+//        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+//            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+//        }
+//    }
+//
+//    // Retreive info from the camera
+//
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+//
+//            CircleImageView profilePic = findViewById(R.id.profile_picture_register);
+//            Bundle extras = data.getExtras();
+//            imageBitmap = (Bitmap) extras.get("data");
+//            profilePic.setImageBitmap(imageBitmap);
+//
+//        }
+//    }
+//
+
+
+
 
 }
 

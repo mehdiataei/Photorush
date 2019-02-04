@@ -2,6 +2,7 @@ package io.github.mehdiataei.photorush;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -34,8 +35,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-
-import io.github.mehdiataei.photorush.Utils.FirebaseMethods;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -333,37 +332,7 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-// Check field validations and communicate with the profile activity
 
-    private void configureSignUpButton() {
-
-
-        signupButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-
-                boolean test = confirmAllInputs();
-
-                Log.d(TAG, String.valueOf(test));
-
-                if (test) {
-
-                    Intent i = new Intent(RegisterActivity.this, HomeActivity.class);
-                    i.putExtra("bio", inputShortBio.getText().toString());
-                    i.putExtra("username", inputUsername.getText().toString());
-                    i.putExtra("profile pic taken", profilePic_taken);
-                    if (profilePic_taken) {
-                        i.putExtra("profile picture", profilePic_thumbnail);
-                    }
-                    startActivity(i);
-
-                }
-
-            }
-        });
-
-    }
 
 // Lunch camera
 
@@ -508,8 +477,16 @@ public class RegisterActivity extends AppCompatActivity {
     private void addThumbnail() {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+
+        if (profilePic_taken) {
+            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        } else {
+
+            imageBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.thumbnail);
+        }
+
         byte[] data = baos.toByteArray();
+
 
         StorageReference thumbnailImagesRef = mStorageRef.child(userID + "/thumbnail.jpg");
 
