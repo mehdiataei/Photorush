@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button loginButton = findViewById(R.id.signup_button);
+        Button loginButton = findViewById(R.id.login_button);
         Button gotoSignupButton = findViewById(R.id.goto_signup_button);
 
 
@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
     private void init() {
 
         //initialize the button for logging in
-        Button btnLogin = (Button) findViewById(R.id.signup_button);
+        Button btnLogin = (Button) findViewById(R.id.login_button);
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

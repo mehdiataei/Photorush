@@ -14,17 +14,21 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -57,7 +61,6 @@ public class RegisterActivity extends AppCompatActivity {
     //firebase
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-    private FirebaseMethods firebaseMethods;
     private StorageReference mStorageRef;
 
     private static final String USERNAME_KEY = "username";
@@ -196,10 +199,9 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void initWidgets() {
         Log.d(TAG, "initWidgets: Initializing Widgets.");
-        firebaseMethods = new FirebaseMethods(RegisterActivity.this);
         inputEmail = findViewById(R.id.email_register);
         inputUsername = findViewById(R.id.username_register);
-        signupButton = findViewById(R.id.signup_button);
+        signupButton = findViewById(R.id.login_button);
         mProgressBar = findViewById(R.id.ProgressBarReg);
         inputPassword = findViewById(R.id.password_register);
         inputPasswordConfirm = findViewById(R.id.password_register_confirm);
@@ -306,6 +308,9 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
 
+    /*
+    ------------------------------------ Camera ---------------------------------------------
+     */
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
@@ -322,9 +327,8 @@ public class RegisterActivity extends AppCompatActivity {
             CircleImageView profilePic = findViewById(R.id.profile_picture_register);
             Bundle extras = data.getExtras();
             imageBitmap = (Bitmap) extras.get("data");
-            profilePic_thumbnail = imageBitmap;
             profilePic_taken = true;
-            profilePic.setImageBitmap(profilePic_thumbnail);
+            profilePic.setImageBitmap(imageBitmap);
 
         }
     }
@@ -420,9 +424,30 @@ public class RegisterActivity extends AppCompatActivity {
                 if (confirmAllInputs()) {
                     Log.d(TAG, "onClick: registering user");
                     mProgressBar.setVisibility(View.VISIBLE);
-                    firebaseMethods.registerNewEmail(email, password, username);
-                    userID = firebaseMethods.getUserID();
-                    addNewUser(username, email, bio, userID);
+                    //firebaseMethods.registerNewEmail(email, password, username);
+                    //userID = mAuth.getCurrentUser().getUid();
+                    mAuth.createUserWithEmailAndPassword(email, password)
+                            .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
+
+                                    // If sign in fails, display a message to the user. If sign in succeeds
+                                    // the auth state listener will be notified and logic to handle the
+                                    // signed in user can be handled in the listener.
+                                    if (!task.isSuccessful()) {
+                                        Toast.makeText(RegisterActivity.this, "Login failed",
+                                                Toast.LENGTH_SHORT).show();
+
+                                    } else if (task.isSuccessful()) {
+                                        userID = mAuth.getCurrentUser().getUid();
+                                        Log.d(TAG, "onComplete: Authstate changed: " + userID);
+                                        addNewUser(username, email, bio);
+
+                                    }
+
+                                }
+                            });
 
                 }
             }
@@ -447,17 +472,24 @@ public class RegisterActivity extends AppCompatActivity {
     /*
     ------------------------------------ Database ---------------------------------------------
      */
-    private void addNewUser(String username, String email, String bio, String userID) {
+    private void addNewUser(String username, String email, String bio) {
         Map<String, Object> newUser = new HashMap<>();
         newUser.put(USERNAME_KEY, username);
         newUser.put(EMAIL_KEY, email);
         newUser.put(BIO_KEY, bio);
         newUser.put(USERID_KEY, userID);
+        Log.d(TAG, "Adding info to the database");
+
         db.collection("Users").document(userID).set(newUser)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, "DocumentSnapshot added");
+
+                        addThumbnail();
+
+                        Intent i = new Intent(RegisterActivity.this, HomeActivity.class);
+                        startActivity(i);
 
 
                     }
@@ -471,6 +503,31 @@ public class RegisterActivity extends AppCompatActivity {
 
                     }
                 });
+    }
+
+    private void addThumbnail() {
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
+
+        StorageReference thumbnailImagesRef = mStorageRef.child(userID + "/thumbnail.jpg");
+
+        UploadTask uploadTask = thumbnailImagesRef.putBytes(data);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle unsuccessful uploads
+                Log.d(TAG, "onFailure: Thumbnail upload failed. ");
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
+                // ...
+                Log.d(TAG, "onSuccess: Thumbnail uploaded. ");
+            }
+        });
     }
 
 }

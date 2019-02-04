@@ -22,6 +22,7 @@ public class FirebaseMethods {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private String userID;
+    boolean isSuccessful;
 
     private Context mContext;
 
@@ -47,6 +48,7 @@ public class FirebaseMethods {
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
+
                         Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
 
                         // If sign in fails, display a message to the user. If sign in succeeds
@@ -57,6 +59,7 @@ public class FirebaseMethods {
                                     Toast.LENGTH_SHORT).show();
 
                         } else if (task.isSuccessful()) {
+                            isSuccessful = task.isSuccessful();
                             userID = mAuth.getCurrentUser().getUid();
                             Log.d(TAG, "onComplete: Authstate changed: " + userID);
                         }
@@ -69,4 +72,9 @@ public class FirebaseMethods {
     public String getUserID() {
         return userID;
     }
+
+    public boolean isSuccessful() {
+        return isSuccessful;
+    }
+
 }
