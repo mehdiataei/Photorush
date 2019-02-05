@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -63,8 +64,9 @@ public class HomeActivity extends AppCompatActivity implements MyRecyclerViewAda
     private String userID;
     private Bundle bundle;
     private MyRecyclerViewAdapter adapter;
+    RecyclerView recyclerView;
     private List<Bitmap> mData;
-    ProgressBar progressBar;
+    //ProgressBar progressBar;
 
     private static final int NUM_OF_COLUMNS = 3;
 
@@ -96,7 +98,7 @@ public class HomeActivity extends AppCompatActivity implements MyRecyclerViewAda
         logoutButton = findViewById(R.id.logout_button);
         uploadButton = findViewById(R.id.upload_button);
 
-        progressBar = findViewById(R.id.progressBarRecy);
+        //progressBar = findViewById(R.id.progressBarRecy);
 
         db = FirebaseFirestore.getInstance();
 
@@ -162,12 +164,12 @@ public class HomeActivity extends AppCompatActivity implements MyRecyclerViewAda
                     setUserThumbnail();
                     readSingleUser();
                     configureCaptureButton();
-                    RecyclerView recyclerView = findViewById(R.id.rvNumbers);
+                    recyclerView = findViewById(R.id.rvNumbers);
 
                     mData = new ArrayList<>();
 
                     // set up the RecyclerView
-                    recyclerView.setLayoutManager(new GridLayoutManager(HomeActivity.this, NUM_OF_COLUMNS));
+                    recyclerView.setLayoutManager(new GridLayoutManager(HomeActivity.this, NUM_OF_COLUMNS, GridLayoutManager.VERTICAL, false));
                     adapter = new MyRecyclerViewAdapter(HomeActivity.this, mData);
 
                     recyclerView.setAdapter(adapter);
@@ -367,15 +369,16 @@ public class HomeActivity extends AppCompatActivity implements MyRecyclerViewAda
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                    progressBar.setVisibility(View.VISIBLE);
+                    //progressBar.setVisibility(View.VISIBLE);
                     Log.d(TAG, "onComplete: grid is initiating.");
                     DocumentSnapshot doc = task.getResult();
                     List<String> addresses = (List<String>) doc.get("images");
 
-                    java.util.Collections.sort(addresses);
 
                     if (addresses != null) {
                         if (addresses.size() > 0) {
+
+                            java.util.Collections.sort(addresses);
 
                             for (String adr : addresses) {
 
@@ -397,7 +400,10 @@ public class HomeActivity extends AppCompatActivity implements MyRecyclerViewAda
                                     public void onComplete(@NonNull Task<byte[]> task) {
                                         Log.d(TAG, "onComplete: Adding images to mData.");
                                         mData.add(0, tempImg);
-                                        adapter.notifyDataSetChanged();
+                                        // Save state
+                                        Parcelable recyclerViewState;
+                                        adapter.notifyItemInserted(0);
+
                                     }
                                 });
                             }
@@ -410,7 +416,7 @@ public class HomeActivity extends AppCompatActivity implements MyRecyclerViewAda
 
                 }
 
-                progressBar.setVisibility(View.GONE);
+                //progressBar.setVisibility(View.GONE);
 
             }
         })
@@ -426,7 +432,7 @@ public class HomeActivity extends AppCompatActivity implements MyRecyclerViewAda
 
     private void addLastImage() {
 
-        progressBar.setVisibility(View.VISIBLE);
+        //progressBar.setVisibility(View.VISIBLE);
 
 
         Log.d(TAG, "addLastImage: Adding last image.");
@@ -441,8 +447,8 @@ public class HomeActivity extends AppCompatActivity implements MyRecyclerViewAda
                 Bitmap img;
                 img = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                 mData.add(0, img);
-                adapter.notifyDataSetChanged();
-                progressBar.setVisibility(View.GONE);
+                adapter.notifyItemInserted(0);
+                //progressBar.setVisibility(View.GONE);
             }
         });
 
