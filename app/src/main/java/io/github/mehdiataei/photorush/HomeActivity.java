@@ -66,6 +66,7 @@ public class HomeActivity extends AppCompatActivity implements MyRecyclerViewAda
     private MyRecyclerViewAdapter adapter;
     RecyclerView recyclerView;
     private List<Bitmap> mData;
+
     //ProgressBar progressBar;
 
     private static final int NUM_OF_COLUMNS = 3;
@@ -103,6 +104,21 @@ public class HomeActivity extends AppCompatActivity implements MyRecyclerViewAda
         db = FirebaseFirestore.getInstance();
 
         setupFirebaseAuth();
+
+        recyclerView = findViewById(R.id.rvNumbers);
+
+        mData = new ArrayList<>();
+
+        // set up the RecyclerView
+        recyclerView.setLayoutManager(new GridLayoutManager(HomeActivity.this, NUM_OF_COLUMNS, GridLayoutManager.VERTICAL, false));
+        adapter = new MyRecyclerViewAdapter(HomeActivity.this, mData);
+
+
+        recyclerView.setAdapter(adapter);
+        recyclerView.setItemAnimator(null);
+
+
+        adapter.setClickListener(HomeActivity.this);
 
     }
 
@@ -160,22 +176,12 @@ public class HomeActivity extends AppCompatActivity implements MyRecyclerViewAda
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                     setLogoutButton();
-                    userID = user.getUid();
+                    setUserID(user.getUid());
                     setUserThumbnail();
+                    profilePic.invalidate();
                     readSingleUser();
                     configureCaptureButton();
-                    recyclerView = findViewById(R.id.rvNumbers);
-
-                    mData = new ArrayList<>();
-
-                    // set up the RecyclerView
-                    recyclerView.setLayoutManager(new GridLayoutManager(HomeActivity.this, NUM_OF_COLUMNS, GridLayoutManager.VERTICAL, false));
-                    adapter = new MyRecyclerViewAdapter(HomeActivity.this, mData);
-
-                    recyclerView.setAdapter(adapter);
-
-                    adapter.setClickListener(HomeActivity.this);
-
+                    mData.clear();
                     initGrid();
 
                     Log.i(TAG, "onAuthStateChanged: I am here.");
@@ -251,13 +257,15 @@ public class HomeActivity extends AppCompatActivity implements MyRecyclerViewAda
         islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {
-                // Data for "images/island.jpg" is returns, use this as needed
+
+                Log.d(TAG, "onSuccess: Thumbnail set.");
                 profPic = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                 profilePic.setImageBitmap(profPic);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
+                Log.d(TAG, "onFailure: Thumbnail set failed.");
                 // Handle any errors
             }
         });
@@ -353,7 +361,7 @@ public class HomeActivity extends AppCompatActivity implements MyRecyclerViewAda
 
                 addImageAddress(adr);
                 setLastImageAddress(adr);
-                addLastImage();
+                getLastImage();
 
             }
         });
@@ -399,10 +407,8 @@ public class HomeActivity extends AppCompatActivity implements MyRecyclerViewAda
                                     @Override
                                     public void onComplete(@NonNull Task<byte[]> task) {
                                         Log.d(TAG, "onComplete: Adding images to mData.");
-                                        mData.add(0, tempImg);
-                                        // Save state
-                                        Parcelable recyclerViewState;
-                                        adapter.notifyItemInserted(0);
+                                        addToMData(tempImg);
+                                        adapter.notifyDataSetChanged();
 
                                     }
                                 });
@@ -430,27 +436,27 @@ public class HomeActivity extends AppCompatActivity implements MyRecyclerViewAda
     }
 
 
-    private void addLastImage() {
+    private void getLastImage() {
 
         //progressBar.setVisibility(View.VISIBLE);
 
 
-        Log.d(TAG, "addLastImage: Adding last image.");
+        Log.d(TAG, "getLastImage: Adding last image.");
         StorageReference ref = mStorageRef.child(lastImageAddress);
 
         final long ONE_MEGABYTE = 1024 * 1024;
         ref.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {
-                Log.d(TAG, "onSuccess: Last image added.");
+                Log.d(TAG, "onSuccess: Last image .");
                 // Data for "images/island.jpg" is returns, use this as needed
                 Bitmap img;
                 img = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                 mData.add(0, img);
                 adapter.notifyItemInserted(0);
-                //progressBar.setVisibility(View.GONE);
             }
         });
+
 
     }
 
@@ -499,8 +505,12 @@ public class HomeActivity extends AppCompatActivity implements MyRecyclerViewAda
     }
 
 
+    public void addToMData(Bitmap tempImg) {
+        this.mData.add(0, tempImg);
+    }
 
-
-
+    public void setUserID(String userID) {
+        this.userID = userID;
+    }
 }
 

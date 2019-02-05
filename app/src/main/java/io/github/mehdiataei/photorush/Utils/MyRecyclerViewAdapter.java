@@ -77,5 +77,11 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         void onItemClick(View view, int position);
     }
 
+    public void updateDataset(List<Bitmap> data) {
+
+        this.mData.clear();
+        this.mData.addAll(data);
+    }
+
 
 }
