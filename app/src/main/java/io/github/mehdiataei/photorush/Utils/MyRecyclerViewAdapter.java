@@ -9,16 +9,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import java.util.List;
+
 import io.github.mehdiataei.photorush.R;
 
 public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
-    private Bitmap[] mData;
+    private List<Bitmap> mData;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
 
     // data is passed into the constructor
-    public MyRecyclerViewAdapter(Context context, Bitmap[] data) {
+    public MyRecyclerViewAdapter(Context context, List<Bitmap> data) {
         this.mInflater = LayoutInflater.from(context);
         this.mData = data;
     }
@@ -34,13 +36,13 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     // binds the data to the TextView in each cell
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.myImageView.setImageBitmap(mData[position]);
+        holder.myImageView.setImageBitmap(mData.get(position));
     }
 
     // total number of cells
     @Override
     public int getItemCount() {
-        return mData.length;
+        return mData.size();
     }
 
 
@@ -62,7 +64,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
 
     // convenience method for getting data at click position
     public Bitmap getItem(int id) {
-        return mData[id];
+        return mData.get(id);
     }
 
     // allows clicks events to be caught
@@ -74,4 +76,6 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     public interface ItemClickListener {
         void onItemClick(View view, int position);
     }
+
+
 }
