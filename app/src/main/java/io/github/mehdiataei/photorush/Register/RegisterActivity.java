@@ -1,4 +1,4 @@
-package io.github.mehdiataei.photorush;
+package io.github.mehdiataei.photorush.Register;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -35,6 +35,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.github.mehdiataei.photorush.Profile.ProfileActivity;
+import io.github.mehdiataei.photorush.R;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -457,7 +459,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                         addThumbnail();
 
-                        Intent i = new Intent(RegisterActivity.this, HomeActivity.class);
+                        Intent i = new Intent(RegisterActivity.this, ProfileActivity.class);
                         startActivity(i);
 
 

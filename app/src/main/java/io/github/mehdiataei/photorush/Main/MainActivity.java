@@ -1,4 +1,4 @@
-package io.github.mehdiataei.photorush;
+package io.github.mehdiataei.photorush.Main;
 
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +18,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import io.github.mehdiataei.photorush.Profile.ProfileActivity;
+import io.github.mehdiataei.photorush.R;
+import io.github.mehdiataei.photorush.Register.RegisterActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -135,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
                                                 Toast.LENGTH_SHORT).show();
                                         mProgressBar.setVisibility(View.GONE);
 
-                                        Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+                                        Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
                                         startActivity(intent);
                                     }
 
@@ -147,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         if (mAuth.getCurrentUser() != null) {
-            Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
             startActivity(intent);
             finish();
         }
