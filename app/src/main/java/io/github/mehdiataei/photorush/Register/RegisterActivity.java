@@ -1,5 +1,6 @@
 package io.github.mehdiataei.photorush.Register;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,11 +18,8 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -38,9 +36,11 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import io.github.mehdiataei.photorush.Profile.ProfileActivity;
 import io.github.mehdiataei.photorush.R;
 
+import io.github.mehdiataei.photorush.Utils.FirebaseMethods;
+
 public class RegisterActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "LoginActivity";
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
 
@@ -55,19 +55,19 @@ public class RegisterActivity extends AppCompatActivity {
 
 
     Bitmap imageBitmap;
-    Bitmap profilePic_thumbnail;
     boolean profilePic_taken;
+
+    private Context mContext;
+
 
 
     //firebase
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private StorageReference mStorageRef;
+    FirebaseMethods firebaseMethods;
 
-    private static final String USERNAME_KEY = "username";
-    private static final String EMAIL_KEY = "email";
-    private static final String BIO_KEY = "bio";
-    private static final String USERID_KEY = "user_id";
+
 
 
     FirebaseFirestore db;
@@ -209,6 +209,8 @@ public class RegisterActivity extends AppCompatActivity {
         inputShortBio = findViewById(R.id.shortBio_register);
         mProgressBar.setVisibility(View.GONE);
         db = FirebaseFirestore.getInstance();
+        mContext = RegisterActivity.this;
+        firebaseMethods = new FirebaseMethods(mContext);
 
 
     }
@@ -373,6 +375,12 @@ public class RegisterActivity extends AppCompatActivity {
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
 
+
+                    //add new user to the database
+                    firebaseMethods.addNewUser(email, username, bio, "");
+
+                    Toast.makeText(mContext, "Signup successful. ", Toast.LENGTH_SHORT).show();
+
                 } else {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
@@ -395,31 +403,7 @@ public class RegisterActivity extends AppCompatActivity {
                 if (confirmAllInputs()) {
                     Log.d(TAG, "onClick: registering user");
                     mProgressBar.setVisibility(View.VISIBLE);
-                    //firebaseMethods.registerNewEmail(email, password, username);
-                    //userID = mAuth.getCurrentUser().getUid();
-                    mAuth.createUserWithEmailAndPassword(email, password)
-                            .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                                @Override
-                                public void onComplete(@NonNull Task<AuthResult> task) {
-                                    Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
-
-                                    // If sign in fails, display a message to the user. If sign in succeeds
-                                    // the auth state listener will be notified and logic to handle the
-                                    // signed in user can be handled in the listener.
-                                    if (!task.isSuccessful()) {
-                                        Toast.makeText(RegisterActivity.this, "Login failed",
-                                                Toast.LENGTH_SHORT).show();
-
-                                    } else if (task.isSuccessful()) {
-                                        userID = mAuth.getCurrentUser().getUid();
-                                        Log.d(TAG, "onComplete: Authstate changed: " + userID);
-                                        addNewUser(username, email, bio);
-
-                                    }
-
-                                }
-                            });
-
+                    firebaseMethods.registerNewEmail(email, password, username);
                 }
             }
         });
@@ -439,42 +423,6 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-
-    /*
-    ------------------------------------ Database ---------------------------------------------
-     */
-    private void addNewUser(String username, String email, String bio) {
-        Map<String, Object> newUser = new HashMap<>();
-        newUser.put(USERNAME_KEY, username);
-        newUser.put(EMAIL_KEY, email);
-        newUser.put(BIO_KEY, bio);
-        newUser.put(USERID_KEY, userID);
-        Log.d(TAG, "Adding info to the database");
-
-        db.collection("Users").document(userID).set(newUser)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "DocumentSnapshot added");
-
-                        addThumbnail();
-
-                        Intent i = new Intent(RegisterActivity.this, ProfileActivity.class);
-                        startActivity(i);
-
-
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-
-                        Log.w(TAG, "Error adding document", e);
-
-
-                    }
-                });
-    }
 
     private void addThumbnail() {
 

@@ -1,4 +1,4 @@
-package io.github.mehdiataei.photorush.Main;
+package io.github.mehdiataei.photorush.Login;
 
 import android.content.Context;
 import android.content.Intent;
@@ -23,9 +23,9 @@ import io.github.mehdiataei.photorush.Profile.ProfileActivity;
 import io.github.mehdiataei.photorush.R;
 import io.github.mehdiataei.photorush.Register.RegisterActivity;
 
-public class MainActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "LoginActivity";
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -55,14 +55,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button loginButton = findViewById(R.id.login_button);
         Button gotoSignupButton = findViewById(R.id.goto_signup_button);
-
 
         mProgressBar = findViewById(R.id.progressBar);
         mEmail = findViewById(R.id.email_login);
         mPassword = findViewById(R.id.password_login);
-        mContext = MainActivity.this;
+        mContext = LoginActivity.this;
         Log.d(TAG, "onCreate: started.");
 
         mProgressBar.setVisibility(View.GONE);
@@ -77,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Log.d(TAG, "go to signup button clicked.");
 
-                Intent signupIntent = new Intent(MainActivity.this, RegisterActivity.class);
+                Intent signupIntent = new Intent(LoginActivity.this, RegisterActivity.class);
                 startActivity(signupIntent);
 
             }
@@ -119,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
                     mProgressBar.setVisibility(View.VISIBLE);
 
                     Task<AuthResult> authResultTask = mAuth.signInWithEmailAndPassword(email, password)
-                            .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
+                            .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
@@ -130,16 +128,16 @@ public class MainActivity extends AppCompatActivity {
                                     if (!task.isSuccessful()) {
                                         Log.w(TAG, "signInWithEmail:failed", task.getException());
 
-                                        Toast.makeText(MainActivity.this, "Login failed",
+                                        Toast.makeText(LoginActivity.this, "Login failed",
                                                 Toast.LENGTH_SHORT).show();
                                         mProgressBar.setVisibility(View.GONE);
                                     } else {
                                         Log.d(TAG, "signInWithEmail: successful login");
-                                        Toast.makeText(MainActivity.this, "Login successful",
+                                        Toast.makeText(LoginActivity.this, "Login successful",
                                                 Toast.LENGTH_SHORT).show();
                                         mProgressBar.setVisibility(View.GONE);
 
-                                        Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                                        Intent intent = new Intent(LoginActivity.this, ProfileActivity.class);
                                         startActivity(intent);
                                     }
 
@@ -151,7 +149,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         if (mAuth.getCurrentUser() != null) {
-            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+
+            Log.d(TAG, "init: User was logged in.");
+            Intent intent = new Intent(LoginActivity.this, ProfileActivity.class);
             startActivity(intent);
             finish();
         }

@@ -7,10 +7,12 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
@@ -35,9 +37,10 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 //import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import io.github.mehdiataei.photorush.Main.MainActivity;
+import io.github.mehdiataei.photorush.Login.LoginActivity;
 import io.github.mehdiataei.photorush.R;
 import io.github.mehdiataei.photorush.Utils.BottomNavigationViewHelper;
 import io.github.mehdiataei.photorush.Utils.MyRecyclerViewAdapter;
@@ -93,27 +96,35 @@ public class ProfileActivity extends AppCompatActivity implements MyRecyclerView
 
         //progressBar = findViewById(R.id.progressBarRecy);
 
-        db = FirebaseFirestore.getInstance();
-
+//        db = FirebaseFirestore.getInstance();
+//
         setupFirebaseAuth();
 
         setupBottomNavigationView();
 
 
-//        recyclerView = findViewById(R.id.rvNumbers);
-//
-//        mData = new ArrayList<>();
-//
-//        // set up the RecyclerView
-//        recyclerView.setLayoutManager(new GridLayoutManager(ProfileActivity.this, NUM_OF_COLUMNS, GridLayoutManager.VERTICAL, false));
-//        adapter = new MyRecyclerViewAdapter(ProfileActivity.this, mData);
-//
-//
-//        recyclerView.setAdapter(adapter);
-//        recyclerView.setItemAnimator(null);
-//
-//
-//        adapter.setClickListener(ProfileActivity.this);
+        recyclerView = findViewById(R.id.rvNumbers);
+
+        mData = new ArrayList<>();
+
+        // set up the RecyclerView
+        recyclerView.setLayoutManager(new GridLayoutManager(ProfileActivity.this, NUM_OF_COLUMNS, GridLayoutManager.VERTICAL, false));
+        adapter = new MyRecyclerViewAdapter(ProfileActivity.this, mData);
+
+        recyclerView.setAdapter(adapter);
+
+        adapter.setClickListener(ProfileActivity.this);
+
+
+        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.thumbnail);
+
+        for (int i = 0; i < 20; i++) {
+
+            mData.add(0, icon);
+
+        }
+
+        adapter.notifyDataSetChanged();
 
     }
 
@@ -161,6 +172,7 @@ public class ProfileActivity extends AppCompatActivity implements MyRecyclerView
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
+                Log.d(TAG, "onAuthStateChanged: State changed.");
 
                 //check if the user is logged in
                 checkCurrentUser(user);
@@ -176,9 +188,6 @@ public class ProfileActivity extends AppCompatActivity implements MyRecyclerView
 //                    configureCaptureButton();
 //                    mData.clear();
 //                    initGrid();
-
-                    Log.i(TAG, "onAuthStateChanged: I am here.");
-
 
                 } else {
 
@@ -210,7 +219,7 @@ public class ProfileActivity extends AppCompatActivity implements MyRecyclerView
         Log.d(TAG, "checkCurrentUser: checking if user is logged in.");
 
         if (user == null) {
-            Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
+            Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
             startActivity(intent);
         }
     }
@@ -219,65 +228,65 @@ public class ProfileActivity extends AppCompatActivity implements MyRecyclerView
     /*
     ------------------------------------ Firebase ---------------------------------------------
     */
-
-    private void readSingleUser() {
-
-        Log.d(TAG, "readSingleUser: " + userID);
-        DocumentReference user = db.collection("Users").document(userID);
-        user.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot doc = task.getResult();
-                    usernameText.setText(doc.get("username").toString());
-                    bioText.setText(doc.get("bio").toString());
-
-                }
-            }
-        })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                    }
-                });
-    }
-
-    private void setUserThumbnail() {
-
-        StorageReference islandRef = mStorageRef.child(userID + "/thumbnail.jpg");
-
-        final long ONE_MEGABYTE = 1024 * 1024;
-        islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-            @Override
-            public void onSuccess(byte[] bytes) {
-
-                Log.d(TAG, "onSuccess: Thumbnail set.");
-                profPic = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                profilePic.setImageBitmap(profPic);
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                Log.d(TAG, "onFailure: Thumbnail set failed.");
-                // Handle any errors
-            }
-        });
-    }
-
-    private void setLogoutButton() {
-
-
-        logoutButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                FirebaseAuth.getInstance().signOut();
-                //finish();
-
-            }
-        });
-
-    }
+//
+//    private void readSingleUser() {
+//
+//        Log.d(TAG, "readSingleUser: " + userID);
+//        DocumentReference user = db.collection("Users").document(userID);
+//        user.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+//            @Override
+//            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+//                if (task.isSuccessful()) {
+//                    DocumentSnapshot doc = task.getResult();
+//                    usernameText.setText(doc.get("username").toString());
+//                    bioText.setText(doc.get("bio").toString());
+//
+//                }
+//            }
+//        })
+//                .addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//                    }
+//                });
+//    }
+//
+//    private void setUserThumbnail() {
+//
+//        StorageReference islandRef = mStorageRef.child(userID + "/thumbnail.jpg");
+//
+//        final long ONE_MEGABYTE = 1024 * 1024;
+//        islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+//            @Override
+//            public void onSuccess(byte[] bytes) {
+//
+//                Log.d(TAG, "onSuccess: Thumbnail set.");
+//                profPic = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+//                profilePic.setImageBitmap(profPic);
+//            }
+//        }).addOnFailureListener(new OnFailureListener() {
+//            @Override
+//            public void onFailure(@NonNull Exception exception) {
+//                Log.d(TAG, "onFailure: Thumbnail set failed.");
+//                // Handle any errors
+//            }
+//        });
+//    }
+//
+//    private void setLogoutButton() {
+//
+//
+//        logoutButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//                FirebaseAuth.getInstance().signOut();
+//                //finish();
+//
+//            }
+//        });
+//
+//    }
 
 
     //    /*

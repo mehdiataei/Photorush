@@ -9,6 +9,8 @@ import android.view.MenuItem;
 
 //import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import io.github.mehdiataei.photorush.Profile.ProfileActivity;
 import io.github.mehdiataei.photorush.R;
 import io.github.mehdiataei.photorush.Feed.FeedActivity;
@@ -24,6 +26,7 @@ public class BottomNavigationViewHelper {
 
     public static void setupBottomNavigationView(BottomNavigationView bottomNavigationView) {
         Log.d(TAG, "setupBottomNavigationView: Setting up BottomNavigationView");
+
 
     }
 
@@ -43,8 +46,11 @@ public class BottomNavigationViewHelper {
                         context.startActivity(intent2);
                         break;
 
+                    case R.id.ic_logout:
+                        Log.d(TAG, "onNavigationItemSelected: Signing out.");
+                        FirebaseAuth.getInstance().signOut();
+                        break;
                 }
-
 
                 return false;
             }
