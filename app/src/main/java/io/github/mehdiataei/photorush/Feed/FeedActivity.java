@@ -16,7 +16,7 @@ import io.github.mehdiataei.photorush.R;
 import io.github.mehdiataei.photorush.Utils.BottomNavigationViewHelper;
 
 public class FeedActivity extends AppCompatActivity {
-    private static final String TAG = "ShareActivity";
+    private static final String TAG = "FeedActivity";
     private static final int ACTIVITY_NUM = 1;
 
     private Context mContext = FeedActivity.this;
@@ -24,7 +24,7 @@ public class FeedActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
+        setContentView(R.layout.activity_feed);
         Log.d(TAG, "onCreate: started.");
 
         setupBottomNavigationView();

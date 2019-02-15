@@ -6,17 +6,26 @@ public class User {
     private String user_id;
     private String email;
     private String username;
+    private String bio;
 
-    public User(String user_id, String email, String username) {
+    public User(String user_id, String email, String username, String bio) {
         this.user_id = user_id;
         this.email = email;
         this.username = username;
+        this.bio = bio;
     }
 
     public User() {
 
     }
 
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
+    public String getBio() {
+        return bio;
+    }
 
     public String getUser_id() {
         return user_id;

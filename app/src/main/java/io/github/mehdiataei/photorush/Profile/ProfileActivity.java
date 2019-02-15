@@ -10,6 +10,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -97,35 +98,50 @@ public class ProfileActivity extends AppCompatActivity implements MyRecyclerView
         //progressBar = findViewById(R.id.progressBarRecy);
 
 //        db = FirebaseFirestore.getInstance();
+
+        init();
+
+
 //
-        setupFirebaseAuth();
+//        setupFirebaseAuth();
+//
+//        setupBottomNavigationView();
+//
+//
+//        recyclerView = findViewById(R.id.rvNumbers);
+//
+//        mData = new ArrayList<>();
+//
+//        // set up the RecyclerView
+//        recyclerView.setLayoutManager(new GridLayoutManager(ProfileActivity.this, NUM_OF_COLUMNS, GridLayoutManager.VERTICAL, false));
+//        adapter = new MyRecyclerViewAdapter(ProfileActivity.this, mData);
+//
+//        recyclerView.setAdapter(adapter);
+//
+//        adapter.setClickListener(ProfileActivity.this);
+//
+//
+//        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.thumbnail);
+//
+//        for (int i = 0; i < 20; i++) {
+//
+//            mData.add(0, icon);
+//
+//        }
+//
+//        adapter.notifyDataSetChanged();
 
-        setupBottomNavigationView();
+    }
 
 
-        recyclerView = findViewById(R.id.rvNumbers);
+    private void init() {
+        Log.d(TAG, "init: inflating " + getString(R.string.profile_fragment));
 
-        mData = new ArrayList<>();
-
-        // set up the RecyclerView
-        recyclerView.setLayoutManager(new GridLayoutManager(ProfileActivity.this, NUM_OF_COLUMNS, GridLayoutManager.VERTICAL, false));
-        adapter = new MyRecyclerViewAdapter(ProfileActivity.this, mData);
-
-        recyclerView.setAdapter(adapter);
-
-        adapter.setClickListener(ProfileActivity.this);
-
-
-        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.thumbnail);
-
-        for (int i = 0; i < 20; i++) {
-
-            mData.add(0, icon);
-
-        }
-
-        adapter.notifyDataSetChanged();
-
+        ProfileFragment fragment = new ProfileFragment();
+        FragmentTransaction transaction = ProfileActivity.this.getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.container, fragment);
+        transaction.addToBackStack(getString(R.string.profile_fragment));
+        transaction.commit();
     }
 
     @Override
@@ -155,74 +171,86 @@ public class ProfileActivity extends AppCompatActivity implements MyRecyclerView
         builder.addContentView(imageView, rel_btn);
         builder.show();
     }
+//
+//
+//    /**
+//     * Firebase Auth setup
+//     */
+//
+//    private void setupFirebaseAuth() {
+//        Log.d(TAG, "setupFirebaseAuth: setting up firebase auth.");
+//
+//        mAuth = FirebaseAuth.getInstance();
+//        mStorageRef = FirebaseStorage.getInstance().getReference();
+//
+//
+//        mAuthListener = new FirebaseAuth.AuthStateListener() {
+//            @Override
+//            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+//                FirebaseUser user = firebaseAuth.getCurrentUser();
+//                Log.d(TAG, "onAuthStateChanged: State changed.");
+//
+//                //check if the user is logged in
+//                checkCurrentUser(user);
+//
+//                if (user != null) {
+//                    // User is signed in
+//                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+////                    setLogoutButton();
+////                    setUserID(user.getUid());
+////                    setUserThumbnail();
+////                    profilePic.invalidate();
+////                    readSingleUser();
+////                    configureCaptureButton();
+////                    mData.clear();
+////                    initGrid();
+//
+//                } else {
+//
+//                    finish();
+//                    // User is signed out
+//                    Log.d(TAG, "onAuthStateChanged:signed_out");
+//                }
+//                // ...
+//            }
+//        };
+//    }
+//
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+//        mAuth.addAuthStateListener(mAuthListener);
+//    }
+//
+//    @Override
+//    public void onStop() {
+//        super.onStop();
+//        if (mAuthListener != null) {
+//            mAuth.removeAuthStateListener(mAuthListener);
+//        }
+//    }
+//
+//
+//    private void checkCurrentUser(FirebaseUser user) {
+//        Log.d(TAG, "checkCurrentUser: checking if user is logged in.");
+//
+//        if (user == null) {
+//            Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
+//            startActivity(intent);
+//        }
+//    }
 
 
-    /**
-     * Firebase Auth setup
-     */
-
-    private void setupFirebaseAuth() {
-        Log.d(TAG, "setupFirebaseAuth: setting up firebase auth.");
-
-        mAuth = FirebaseAuth.getInstance();
-        mStorageRef = FirebaseStorage.getInstance().getReference();
 
 
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                Log.d(TAG, "onAuthStateChanged: State changed.");
-
-                //check if the user is logged in
-                checkCurrentUser(user);
-
-                if (user != null) {
-                    // User is signed in
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-//                    setLogoutButton();
-//                    setUserID(user.getUid());
-//                    setUserThumbnail();
-//                    profilePic.invalidate();
-//                    readSingleUser();
-//                    configureCaptureButton();
-//                    mData.clear();
-//                    initGrid();
-
-                } else {
-
-                    finish();
-                    // User is signed out
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
-                }
-                // ...
-            }
-        };
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (mAuthListener != null) {
-            mAuth.removeAuthStateListener(mAuthListener);
-        }
-    }
 
 
-    private void checkCurrentUser(FirebaseUser user) {
-        Log.d(TAG, "checkCurrentUser: checking if user is logged in.");
 
-        if (user == null) {
-            Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
-            startActivity(intent);
-        }
-    }
+
+
+
+
+
 
 
     /*
@@ -519,15 +547,15 @@ public class ProfileActivity extends AppCompatActivity implements MyRecyclerView
     /**
      * BottomNavigationView setup
      */
-    private void setupBottomNavigationView() {
-        Log.d(TAG, "setupBottomNavigationView: setting up BottomNavigationView");
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        BottomNavigationViewHelper.setupBottomNavigationView(bottomNavigationView);
-        BottomNavigationViewHelper.enableNavigation(mContext, bottomNavigationView);
-        Menu menu = bottomNavigationView.getMenu();
-        MenuItem menuItem = menu.getItem(ACTIVITY_NUM);
-        menuItem.setChecked(true);
-    }
+//    private void setupBottomNavigationView() {
+//        Log.d(TAG, "setupBottomNavigationView: setting up BottomNavigationView");
+//        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+//        BottomNavigationViewHelper.setupBottomNavigationView(bottomNavigationView);
+//        BottomNavigationViewHelper.enableNavigation(mContext, bottomNavigationView);
+//        Menu menu = bottomNavigationView.getMenu();
+//        MenuItem menuItem = menu.getItem(ACTIVITY_NUM);
+//        menuItem.setChecked(true);
+//    }
 }
 
 

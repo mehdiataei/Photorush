@@ -12,6 +12,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -22,7 +24,6 @@ import java.util.Map;
 import io.github.mehdiataei.photorush.Models.User;
 import io.github.mehdiataei.photorush.Profile.ProfileActivity;
 import io.github.mehdiataei.photorush.R;
-import io.github.mehdiataei.photorush.Register.RegisterActivity;
 
 /**
  * Created by User on 6/26/2017.
@@ -37,7 +38,8 @@ public class FirebaseMethods {
     private FirebaseAuth.AuthStateListener mAuthListener;
     private String userID;
     private FirebaseFirestore db;
-    private StorageReference myRef;
+    private StorageReference storageRef;
+    private DocumentReference docRef;
 
     private static final String USERNAME_KEY = "username";
     private static final String EMAIL_KEY = "email";
@@ -50,7 +52,8 @@ public class FirebaseMethods {
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-        myRef = FirebaseStorage.getInstance().getReference();
+        storageRef = FirebaseStorage.getInstance().getReference();
+        docRef = db.collection("cities");
         mContext = context;
 
 
@@ -124,6 +127,35 @@ public class FirebaseMethods {
 
             }
         });
+    }
+
+    private User getUserSettings() {
+        Log.d(TAG, "getUserAccountSettings: retrieving user account settings from firebase.");
+
+
+        final User user = new User();
+
+        Log.d(TAG, "readSingleUser: " + userID);
+        DocumentReference userInfo = db.collection("Users").document(userID);
+        userInfo.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot doc = task.getResult();
+
+                    user.setUsername(doc.get("username").toString());
+                    user.setBio(doc.get("bio").toString());
+
+                }
+            }
+        })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                    }
+                });
+
+        return user;
     }
 
 }

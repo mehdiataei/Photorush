@@ -6,5 +6,10 @@
     <string name="email">Email</string>
     <string name="signUp">Sign up</string>
 
+    <!-- fragment names -->
+    <string name="edit_profile_fragment">Edit Profile</string>
+    <string name="sign_out_fragment">Sign Out</string>
+    <string name="profile_fragment">Profile</string>
+
 
 </resources>
