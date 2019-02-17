@@ -34,9 +34,19 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation files('libs/CircleImageView/gradle/wrapper/gradle-wrapper.jar')
     implementation 'de.hdodenhof:circleimageview:3.0.0'
-    //BottomNavigationViewEx library
-    //implementation 'com.github.ittianyu:BottomNavigationViewEx:2.0.2'
     implementation 'com.android.support:design:28.0.0'
+
+
+    //Glide
+    implementation 'com.github.bumptech.glide:okhttp3-integration:4.4.0'
+    implementation 'com.github.bumptech.glide:glide:4.9.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
+
+    // ML kit
+    implementation 'com.google.firebase:firebase-ml-vision:19.0.2'
+    implementation 'com.google.firebase:firebase-ml-vision-image-label-model:17.0.2'
+
+
 }
 
 apply plugin: 'com.google.gms.google-services'

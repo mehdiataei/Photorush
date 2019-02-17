@@ -53,7 +53,6 @@ public class FirebaseMethods {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         storageRef = FirebaseStorage.getInstance().getReference();
-        docRef = db.collection("cities");
         mContext = context;
 
 

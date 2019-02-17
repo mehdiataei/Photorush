@@ -10,6 +10,8 @@
     <color name="white">#ffffff</color>
     <color name="grey">#bfbfbf</color>
     <color name="selector_item_color">#00ACEE</color>
+    <color name="link_blue">#005ce6</color>
+    <color name="black">#000000</color>
 
 
 </resources>
