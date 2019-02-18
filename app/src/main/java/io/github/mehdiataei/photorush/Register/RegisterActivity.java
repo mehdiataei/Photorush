@@ -253,7 +253,7 @@ public class RegisterActivity extends AppCompatActivity {
             inputPassword.setError("Field cannot be empty");
             return false;
         } else if (!PASSWORD_PATTERN.matcher(passwordInput).matches()) {
-            inputPassword.setError("Password is too weak");
+            inputPassword.setError("Password should be at least 6 characters");
             return false;
         } else {
             inputPassword.setError(null);

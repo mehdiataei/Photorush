@@ -4,7 +4,10 @@ package io.github.mehdiataei.photorush.Share;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -18,13 +21,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.ml.vision.label.FirebaseVisionImageLabel;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +58,10 @@ public class NextActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     FirebaseMethods mFirebaseMethods;
+    private StorageReference mStorageRef;
+    private FirebaseFirestore db;
+
+
 
     //widgets
     private EditText mCaption;
@@ -60,6 +76,9 @@ public class NextActivity extends AppCompatActivity {
     private List<FirebaseVisionImageLabel> hashtagsInfo;
     private List<String> hashtags;
 
+    Uri photoURI;
+
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +87,12 @@ public class NextActivity extends AppCompatActivity {
         mCaption = findViewById(R.id.caption);
         toggle = findViewById(R.id.hashtag_toggle);
         hashtags = new ArrayList<>();
+
+        mStorageRef = FirebaseStorage.getInstance().getReference();
+        db = FirebaseFirestore.getInstance();
+
+
+
 
         setupFirebaseAuth();
 
@@ -80,6 +105,14 @@ public class NextActivity extends AppCompatActivity {
             }
         });
 
+        TextView shareButton = findViewById(R.id.tvShare);
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
 
         TextView share = findViewById(R.id.tvShare);
         share.setOnClickListener(new View.OnClickListener() {
@@ -88,19 +121,11 @@ public class NextActivity extends AppCompatActivity {
                 Log.d(TAG, "onClick: navigating to the final share screen.");
                 //upload the image to firebase
                 Toast.makeText(NextActivity.this, "Attempting to upload new photo", Toast.LENGTH_SHORT).show();
-//                String caption = mCaption.getText().toString();
+                String caption = mCaption.getText().toString();
 
-//                if(intent.hasExtra(getString(R.string.selected_image))){
-//                    imgUrl = intent.getStringExtra(getString(R.string.selected_image));
-//                    mFirebaseMethods.uploadNewPhoto(getString(R.string.new_photo), caption, imageCount, imgUrl,null);
-//                }
-//                else if(intent.hasExtra(getString(R.string.selected_bitmap))){
-//                    bitmap = (Bitmap) intent.getParcelableExtra(getString(R.string.selected_bitmap));
-//                    mFirebaseMethods.uploadNewPhoto(getString(R.string.new_photo), caption, imageCount, null,bitmap);
-//                }
-
-
+                mFirebaseMethods.uploadNewPhoto(getString(R.string.new_photo), caption, imageCount, photoURI, null);
             }
+
         });
 
         setImage();
@@ -130,7 +155,7 @@ public class NextActivity extends AppCompatActivity {
 
                                     for (FirebaseVisionImageLabel label : labels) {
                                         hashtags.add(0, label.getText());
-                                        mCaption.append("#" + label.getText() + " ");
+                                        mCaption.append("#" + label.getText().replaceAll("\\s+", "") + " ");
                                         Log.d(TAG, "onSuccess: Generated hashtag is: " + label.getText());
                                     }
 
@@ -219,21 +244,22 @@ public class NextActivity extends AppCompatActivity {
             }
         };
 //
-//
-//        myRef.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//
-//                imageCount = mFirebaseMethods.getImageCount(dataSnapshot);
-//                Log.d(TAG, "onDataChange: image count: " + imageCount);
-//
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//
-//            }
-//        });
+
+        db.collection(getString(R.string.dbname_user_photos))
+                .whereEqualTo("user_id", FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+
+                        if (task.isSuccessful()) {
+                            QuerySnapshot querySnapshot;
+                            imageCount = mFirebaseMethods.getImageCount(task.getResult());
+                        }
+
+                    }
+                });
+
     }
 
     /**
@@ -244,12 +270,22 @@ public class NextActivity extends AppCompatActivity {
         ImageView image = findViewById(R.id.imageShare);
 
         if (intent.hasExtra(getString(R.string.selected_bitmap))) {
-            bitmap = intent.getParcelableExtra(getString(R.string.selected_bitmap));
+
+            photoURI = intent.getParcelableExtra(getString(R.string.selected_bitmap));
             Log.d(TAG, "setImage: Got new bitmap");
 
+            Log.d(TAG, "onActivityResult: PhotoURI is: " + photoURI);
+
+            try {
+                Log.d(TAG, "onActivityResult: PhotoURI is: " + photoURI);
+                bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), photoURI);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 30, stream);
 
             Glide.with(this)
                     .asBitmap()
@@ -257,6 +293,7 @@ public class NextActivity extends AppCompatActivity {
                     .error(R.drawable.ic_error)
                     .into(image);
         }
+
     }
 
 

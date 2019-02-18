@@ -5,15 +5,18 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -38,8 +41,15 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import io.github.mehdiataei.photorush.Login.LoginActivity;
 import io.github.mehdiataei.photorush.Models.User;
@@ -48,6 +58,7 @@ import io.github.mehdiataei.photorush.Share.NextActivity;
 import io.github.mehdiataei.photorush.Utils.BottomNavigationViewHelper;
 import io.github.mehdiataei.photorush.Utils.MyRecyclerViewAdapter;
 
+import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 
 /**
@@ -66,6 +77,8 @@ public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.I
     private MyRecyclerViewAdapter adapter;
     RecyclerView recyclerView;
     private List<Bitmap> mData;
+    private String mCurrentPhotoPath;
+    Uri photoURI;
 
 
     private static final int NUM_OF_COLUMNS = 3;
@@ -134,28 +147,6 @@ public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.I
     public void onItemClick(View view, int position) {
         Log.i("TAG", "You clicked number " + adapter.getItem(position) + ", which is at cell position " + position);
 
-
-        Dialog builder = new Dialog(mContext);
-        builder.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        builder.getWindow().setBackgroundDrawable(
-                new ColorDrawable(android.graphics.Color.TRANSPARENT));
-        builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialogInterface) {
-                //nothing;
-            }
-        });
-
-        ImageView imageView = new ImageView(mContext);
-        imageView.setImageBitmap(adapter.getItem(position));
-
-        final float scale = mContext.getResources().getDisplayMetrics().density;
-        int pixels = (int) (400 * scale + 0.5f);
-
-        RelativeLayout.LayoutParams rel_btn = new RelativeLayout.LayoutParams(pixels, pixels);
-
-        builder.addContentView(imageView, rel_btn);
-        builder.show();
     }
 
     private void setProfileWidgets(User user) {
@@ -263,11 +254,52 @@ public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.I
      * Camera
      */
 
+//    private void dispatchTakePictureIntent() {
+//        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//        if (takePictureIntent.resolveActivity(mContext.getPackageManager()) != null) {
+//            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+//        }
+//    }
+
+
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(mContext.getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                photoURI = FileProvider.getUriForFile(mContext,
+                        "io.github.mehdiataei.photorush",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            }
         }
+    }
+
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.CANADA).format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = mContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = image.getAbsolutePath();
+        Log.d(TAG, "createImageFile: Absolute path is: " + mCurrentPhotoPath);
+        return image;
     }
 
     // Lunch camera
@@ -288,19 +320,17 @@ public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.I
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK && resultCode != RESULT_CANCELED) {
 
             Log.d(TAG, "onActivityResult: Done taking a photo.");
             Log.d(TAG, "onActivityResult: Attempting to navigate to final share screen.");
 
-            Bitmap bitmap;
-            bitmap = (Bitmap) data.getExtras().get("data");
-
             try {
-                Log.d(TAG, "onActivityResult: Received new bitmap from camera: " + bitmap);
-                Intent intent = new Intent(getActivity(), NextActivity.class);
-                intent.putExtra(getString(R.string.selected_bitmap), bitmap);
-                startActivity(intent);
+
+                Intent intent = new Intent(mContext, NextActivity.class);
+
+                intent.putExtra(getString(R.string.selected_bitmap), photoURI);
+                mContext.startActivity((intent));
             } catch (NullPointerException e) {
                 Log.d(TAG, "onActivityResult: NullPointerException: " + e.getMessage());
             }

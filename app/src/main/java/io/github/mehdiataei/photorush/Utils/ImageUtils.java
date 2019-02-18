@@ -11,6 +11,16 @@ import android.os.Build;
 import java.io.IOException;
 import java.io.InputStream;
 
+import android.provider.MediaStore;
+import android.util.Log;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
+
+
 public class ImageUtils {
 
     public ImageUtils() {
@@ -140,4 +150,24 @@ public class ImageUtils {
         img.recycle();
         return rotatedImg;
     }
+
+
+    private static final String TAG = "ImageManager";
+
+
+    /**
+     * return byte array from a bitmap
+     * quality is greater than 0 but less than 100
+     *
+     * @param bm
+     * @param quality
+     * @return
+     */
+    public static byte[] getBytesFromBitmap(Bitmap bm, int quality) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.JPEG, quality, stream);
+        return stream.toByteArray();
+    }
+
+
 }

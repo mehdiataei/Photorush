@@ -20,8 +20,29 @@
     <string name="calling_activity">calling_activity</string>
     <string name="selected_image">selected_image</string>
     <string name="selected_bitmap">selected_bitmap</string>
+    <string name="selected_uri">selected_uri</string>
     <string name="return_to_fragment">return_to_fragment</string>
     <string name="auto_hashtag">Auto Hashtag</string>
+
+
+    <!-- Firebase messages -->
+    <string name="auth_failed">Failed to Authenticate</string>
+    <string name="auth_success">Authentication Success</string>
+
+    <!-- Firebase database fields -->
+    <string name="dbname_users">Users</string>
+    <string name="dbname_photos">Photos</string>
+    <string name="dbname_user_photos">User_photos</string>
+    <string name="field_username">username</string>
+    <string name="field_email">email</string>
+    <string name="field_display_name">display_name</string>
+    <string name="field_website">website</string>
+    <string name="field_description">description</string>
+    <string name="field_phone_number">phone_number</string>
+
+    <!-- photo types -->
+    <string name="new_photo">new_photo</string>
+    <string name="profile_photo">profile_photo</string>
 
 
 </resources>
