@@ -38,15 +38,30 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 //import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import io.github.mehdiataei.photorush.Login.LoginActivity;
+import io.github.mehdiataei.photorush.Models.Photo;
 import io.github.mehdiataei.photorush.R;
-import io.github.mehdiataei.photorush.Utils.BottomNavigationViewHelper;
 import io.github.mehdiataei.photorush.Utils.MyRecyclerViewAdapter;
 
-public class ProfileActivity extends AppCompatActivity {
+public class ProfileActivity extends AppCompatActivity implements ViewPostFragment.OnCommentThreadSelectedListener {
+
+
+    @Override
+    public void onCommentThreadSelectedListener(Photo photo) {
+
+        ViewCommentsFragment fragment = new ViewCommentsFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(getString(R.string.photo), photo);
+        fragment.setArguments(args);
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.container, fragment);
+        transaction.addToBackStack(getString(R.string.view_comments_fragment));
+        transaction.commit();
+
+
+    }
 
 
     private static final String TAG = "ProfileActivity";

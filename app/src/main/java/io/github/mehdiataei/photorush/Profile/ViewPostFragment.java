@@ -34,12 +34,6 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-
 import io.github.mehdiataei.photorush.Login.LoginActivity;
 import io.github.mehdiataei.photorush.Models.User;
 import io.github.mehdiataei.photorush.R;
@@ -50,11 +44,16 @@ import io.github.mehdiataei.photorush.Utils.SquareImageView;
 import io.github.mehdiataei.photorush.Utils.GlideImageLoader;
 import io.github.mehdiataei.photorush.Models.Photo;
 
-/**
- * Created by User on 8/12/2017.
- */
 
 public class ViewPostFragment extends Fragment {
+
+
+    public interface OnCommentThreadSelectedListener {
+        void onCommentThreadSelectedListener(Photo photo);
+    }
+
+    OnCommentThreadSelectedListener mOnCommentThreadSelectedListener;
+
 
     private static final String TAG = "ViewPostFragment";
 
@@ -71,6 +70,7 @@ public class ViewPostFragment extends Fragment {
     private ProgressBar mProgressbar;
     private Context mContext;
     private User mUser;
+    private TextView mCommentsLink;
 
 
     // Firebase
@@ -93,6 +93,7 @@ public class ViewPostFragment extends Fragment {
         mUsername = view.findViewById(R.id.username);
         mProfileImage = view.findViewById(R.id.profile_photo);
         mProgressbar = view.findViewById(R.id.view_post_progressbar);
+        mCommentsLink = view.findViewById(R.id.image_comments_link);
 
         try {
             mPhoto = getPhotoFromBundle();
@@ -111,6 +112,7 @@ public class ViewPostFragment extends Fragment {
             Log.e(TAG, "onCreateView: NullPointerException: " + e.getMessage());
         }
 
+
         mBackArrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -119,8 +121,21 @@ public class ViewPostFragment extends Fragment {
             }
         });
 
+        mCommentsLink.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Log.d(TAG, "onClick: Clicking see comments.");
+
+                mOnCommentThreadSelectedListener.onCommentThreadSelectedListener(mPhoto);
+
+            }
+        });
+
 
         getPhotoDetails();
+
+        setupFirebaseAuth();
 
         setupBottomNavigationView();
 
@@ -259,5 +274,30 @@ public class ViewPostFragment extends Fragment {
         Menu menu = bottomNavigationView.getMenu();
         MenuItem menuItem = menu.getItem(mActivityNumber);
         menuItem.setChecked(true);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            mOnCommentThreadSelectedListener = (OnCommentThreadSelectedListener) getActivity();
+        } catch (ClassCastException e) {
+            Log.e(TAG, "onAttach: ClassCastException: " + e.getMessage());
+        }
+    }
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
     }
 }

@@ -47,6 +47,10 @@
     <string name="activity_number">activity_number</string>
     <string name="photo">photo</string>
     <string name="view_post_fragment">view_post_fragment</string>
+    <string name="view_comments_fragment">view_comments_fragment</string>
+    <string name="field_comments">field_comments</string>
+    <string name="dbname_comments">comments</string>
+    <string name="field_photo_id">photo_id</string>
 
 
 </resources>

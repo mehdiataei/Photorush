@@ -260,6 +260,11 @@ public class FirebaseMethods {
                     //navigate to the main feed so the user can see their photo
                     Intent intent = new Intent(mContext, ProfileActivity.class);
                     intent.putExtra(mContext.getString(R.string.photo_added), true);
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+
+                    }
                     mContext.startActivity(intent);
                 }
             });
