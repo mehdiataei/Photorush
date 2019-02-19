@@ -2,6 +2,7 @@ package io.github.mehdiataei.photorush.Utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -16,18 +17,19 @@ import com.bumptech.glide.request.RequestOptions;
 
 import java.util.List;
 
+import io.github.mehdiataei.photorush.Models.Photo;
 import io.github.mehdiataei.photorush.R;
 
 import static android.support.constraint.Constraints.TAG;
 
 public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
-    private List<Bitmap> mData;
+    private List<Photo> mData;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
 
     // data is passed into the constructor
-    public MyRecyclerViewAdapter(Context context, List<Bitmap> data) {
+    public MyRecyclerViewAdapter(Context context, List<Photo> data) {
         this.mInflater = LayoutInflater.from(context);
         this.mData = data;
     }
@@ -48,12 +50,11 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
 
         RequestOptions options = new RequestOptions()
                 .centerCrop()
-                .placeholder(R.drawable.ic_add)
                 .error(R.drawable.ic_error)
                 .priority(Priority.HIGH);
 
         new GlideImageLoader(holder.myImageView,
-                holder.myProgressBar).load("https://cdn.pixabay.com/photo/2015/09/07/15/01/monkey-928633_960_720.jpg", options);
+                holder.myProgressBar).load(mData.get(position).getImage_path(), options);
 
     }
 
@@ -82,7 +83,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     }
 
     // convenience method for getting data at click position
-    public Bitmap getItem(int id) {
+    public Photo getItem(int id) {
         return mData.get(id);
     }
 
@@ -94,12 +95,6 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
         void onItemClick(View view, int position);
-    }
-
-    public void updateDataset(List<Bitmap> data) {
-
-        this.mData.clear();
-        this.mData.addAll(data);
     }
 
 

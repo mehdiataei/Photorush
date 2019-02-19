@@ -3,6 +3,7 @@ package io.github.mehdiataei.photorush.Utils;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -26,6 +27,7 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -58,6 +60,7 @@ public class FirebaseMethods {
     private static final String EMAIL_KEY = "email";
     private static final String BIO_KEY = "bio";
     private static final String USERID_KEY = "user_id";
+    private static final String PROFILE_PHOTO_KEY = "profile_photo";
 
     private Context mContext;
 
@@ -109,13 +112,13 @@ public class FirebaseMethods {
     }
 
 
-    public void addNewUser(String email, String username, String bio, String profile_photo) {
+    public void addNewUser(String email, String username, String bio) {
 
         Map<String, Object> newUser = new HashMap<>();
         newUser.put(USERNAME_KEY, username);
         newUser.put(EMAIL_KEY, email);
         newUser.put(BIO_KEY, bio);
-        newUser.put(USERID_KEY, userID);
+        newUser.put(USERID_KEY, mAuth.getCurrentUser().getUid());
         Log.d(TAG, "Adding info to the database");
 
         db.collection("Users").document(mAuth.getCurrentUser().getUid()).set(newUser)
@@ -152,7 +155,7 @@ public class FirebaseMethods {
         final User user = new User();
 
         Log.d(TAG, "readSingleUser: " + userID);
-        DocumentReference userInfo = db.collection("Users").document(userID);
+        DocumentReference userInfo = db.collection("Users").document(mAuth.getCurrentUser().getUid());
         userInfo.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -161,6 +164,9 @@ public class FirebaseMethods {
 
                     user.setUsername(doc.get("username").toString());
                     user.setBio(doc.get("bio").toString());
+                    user.setEmail(doc.get("email").toString());
+                    user.setUser_id(doc.get("user_id").toString());
+                    user.setProfile_photo(doc.get("profile_photo").toString());
 
                 }
             }
@@ -223,9 +229,6 @@ public class FirebaseMethods {
                     Toast.makeText(mContext, "photo upload success", Toast.LENGTH_SHORT).show();
 
 
-                    //navigate to the main feed so the user can see their photo
-                    Intent intent = new Intent(mContext, ProfileActivity.class);
-                    mContext.startActivity(intent);
 
                 }
 
@@ -251,7 +254,15 @@ public class FirebaseMethods {
 
                             Log.d(TAG, "onProgress: upload progress: " + progress + "% done");
                         }
-                    });
+                    }).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    //navigate to the main feed so the user can see their photo
+                    Intent intent = new Intent(mContext, ProfileActivity.class);
+                    intent.putExtra(mContext.getString(R.string.photo_added), true);
+                    mContext.startActivity(intent);
+                }
+            });
         }//case new profile photo
         else if (photoType.equals(mContext.getString(R.string.profile_photo))) {
             Log.d(TAG, "uploadNewPhoto: uploading new PROFILE photo");
@@ -291,7 +302,7 @@ public class FirebaseMethods {
                             //add the new photo to 'photos' node and 'user_photos' node
                             addPhotoToDatabase(caption, downloadUrl.toString());
 
-                            //insert into 'user_account_settings' node
+                            //insert into 'Users' node
                             setProfilePhoto(downloadUrl.toString());
 
 
@@ -351,17 +362,63 @@ public class FirebaseMethods {
         return timeStamp;
     }
 
-
     private void setProfilePhoto(String url) {
-        Log.d(TAG, "setProfilePhoto: setting new profile image: " + url);
+        Log.d(TAG, "setProfilePhoto: Setting new profile image: " + url);
 
         Map<String, Object> docData = new HashMap<>();
 
         docData.put(mContext.getString(R.string.profile_photo), url);
 
         db.collection(mContext.getString(R.string.dbname_users))
-                .document(FirebaseAuth.getInstance().getCurrentUser().getUid()).set(docData);
+                .document(FirebaseAuth.getInstance().getCurrentUser().getUid()).update(docData);
 
+    }
+
+
+    public void addThumbnail(Bitmap bitmap, boolean profilePic_taken) {
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        if (profilePic_taken) {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        } else {
+
+            bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.thumbnail);
+        }
+
+        byte[] data = baos.toByteArray();
+
+        FilePaths paths = new FilePaths();
+
+        final StorageReference thumbnailImagesRef = mStorageRef.child(paths.FIREBASE_IMAGE_STORAGE + mAuth.getCurrentUser().getUid() + "/thumbnail.jpg");
+
+        UploadTask uploadTask = thumbnailImagesRef.putBytes(data);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle unsuccessful uploads
+                Log.d(TAG, "onFailure: Thumbnail upload failed. ");
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                thumbnailImagesRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        Uri downloadUrl = uri;
+                        //Do what you want with the url
+                        //add the new photo to 'photos' node and 'user_photos' node
+                        Log.d(TAG, "onSuccess: Adding photo to the database.");
+                        setProfilePhoto(downloadUrl.toString());
+
+                    }
+                });
+                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
+                // ...
+                Log.d(TAG, "onSuccess: Thumbnail uploaded. ");
+            }
+        });
     }
 
 
@@ -386,8 +443,6 @@ public class FirebaseMethods {
         int count = 0;
 
         for (QueryDocumentSnapshot document : snapshot) {
-            Log.d(TAG, document.getId() + " => " + document.getData());
-
             count++;
         }
 

@@ -46,7 +46,7 @@ import io.github.mehdiataei.photorush.R;
 import io.github.mehdiataei.photorush.Utils.BottomNavigationViewHelper;
 import io.github.mehdiataei.photorush.Utils.MyRecyclerViewAdapter;
 
-public class ProfileActivity extends AppCompatActivity implements MyRecyclerViewAdapter.ItemClickListener {
+public class ProfileActivity extends AppCompatActivity {
 
 
     private static final String TAG = "ProfileActivity";
@@ -91,45 +91,10 @@ public class ProfileActivity extends AppCompatActivity implements MyRecyclerView
         profilePic = findViewById(R.id.profile_picture);
         usernameText = findViewById(R.id.username_text);
         bioText = findViewById(R.id.shortBio_profile);
-//
-//        logoutButton = findViewById(R.id.logout_button);
-//        uploadButton = findViewById(R.id.upload_button);
-
-        //progressBar = findViewById(R.id.progressBarRecy);
-
-//        db = FirebaseFirestore.getInstance();
 
         init();
 
 
-//
-//        setupFirebaseAuth();
-//
-//        setupBottomNavigationView();
-//
-//
-//        recyclerView = findViewById(R.id.rvNumbers);
-//
-//        mData = new ArrayList<>();
-//
-//        // set up the RecyclerView
-//        recyclerView.setLayoutManager(new GridLayoutManager(ProfileActivity.this, NUM_OF_COLUMNS, GridLayoutManager.VERTICAL, false));
-//        adapter = new MyRecyclerViewAdapter(ProfileActivity.this, mData);
-//
-//        recyclerView.setAdapter(adapter);
-//
-//        adapter.setClickListener(ProfileActivity.this);
-//
-//
-//        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.thumbnail);
-//
-//        for (int i = 0; i < 20; i++) {
-//
-//            mData.add(0, icon);
-//
-//        }
-//
-//        adapter.notifyDataSetChanged();
 
     }
 
@@ -143,113 +108,6 @@ public class ProfileActivity extends AppCompatActivity implements MyRecyclerView
         transaction.addToBackStack(getString(R.string.profile_fragment));
         transaction.commit();
     }
-
-    @Override
-    public void onItemClick(View view, int position) {
-        Log.i("TAG", "You clicked number " + adapter.getItem(position) + ", which is at cell position " + position);
-
-
-        Dialog builder = new Dialog(ProfileActivity.this);
-        builder.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        builder.getWindow().setBackgroundDrawable(
-                new ColorDrawable(android.graphics.Color.TRANSPARENT));
-        builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialogInterface) {
-                //nothing;
-            }
-        });
-
-        ImageView imageView = new ImageView(ProfileActivity.this);
-        imageView.setImageBitmap(adapter.getItem(position));
-
-        final float scale = ProfileActivity.this.getResources().getDisplayMetrics().density;
-        int pixels = (int) (400 * scale + 0.5f);
-
-        RelativeLayout.LayoutParams rel_btn = new RelativeLayout.LayoutParams(pixels, pixels);
-
-        builder.addContentView(imageView, rel_btn);
-        builder.show();
-    }
-//
-//
-//    /**
-//     * Firebase Auth setup
-//     */
-//
-//    private void setupFirebaseAuth() {
-//        Log.d(TAG, "setupFirebaseAuth: setting up firebase auth.");
-//
-//        mAuth = FirebaseAuth.getInstance();
-//        mStorageRef = FirebaseStorage.getInstance().getReference();
-//
-//
-//        mAuthListener = new FirebaseAuth.AuthStateListener() {
-//            @Override
-//            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-//                FirebaseUser user = firebaseAuth.getCurrentUser();
-//                Log.d(TAG, "onAuthStateChanged: State changed.");
-//
-//                //check if the user is logged in
-//                checkCurrentUser(user);
-//
-//                if (user != null) {
-//                    // User is signed in
-//                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-////                    setLogoutButton();
-////                    setUserID(user.getUid());
-////                    setUserThumbnail();
-////                    profilePic.invalidate();
-////                    readSingleUser();
-////                    configureCaptureButton();
-////                    mData.clear();
-////                    initGrid();
-//
-//                } else {
-//
-//                    finish();
-//                    // User is signed out
-//                    Log.d(TAG, "onAuthStateChanged:signed_out");
-//                }
-//                // ...
-//            }
-//        };
-//    }
-//
-//    @Override
-//    public void onStart() {
-//        super.onStart();
-//        mAuth.addAuthStateListener(mAuthListener);
-//    }
-//
-//    @Override
-//    public void onStop() {
-//        super.onStop();
-//        if (mAuthListener != null) {
-//            mAuth.removeAuthStateListener(mAuthListener);
-//        }
-//    }
-//
-//
-//    private void checkCurrentUser(FirebaseUser user) {
-//        Log.d(TAG, "checkCurrentUser: checking if user is logged in.");
-//
-//        if (user == null) {
-//            Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
-//            startActivity(intent);
-//        }
-//    }
-
-
-
-
-
-
-
-
-
-
-
 
 
 

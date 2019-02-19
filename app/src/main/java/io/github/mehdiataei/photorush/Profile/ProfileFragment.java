@@ -16,6 +16,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.FileProvider;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -31,6 +32,9 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -38,6 +42,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -45,17 +52,22 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import io.github.mehdiataei.photorush.Login.LoginActivity;
+import io.github.mehdiataei.photorush.Models.Photo;
 import io.github.mehdiataei.photorush.Models.User;
 import io.github.mehdiataei.photorush.R;
 import io.github.mehdiataei.photorush.Share.NextActivity;
 import io.github.mehdiataei.photorush.Utils.BottomNavigationViewHelper;
+import io.github.mehdiataei.photorush.Utils.FirebaseMethods;
+import io.github.mehdiataei.photorush.Utils.GlideApp;
 import io.github.mehdiataei.photorush.Utils.MyRecyclerViewAdapter;
 
 import static android.app.Activity.RESULT_CANCELED;
@@ -67,6 +79,7 @@ import static android.app.Activity.RESULT_OK;
 
 public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.ItemClickListener {
 
+
     private static final String TAG = "ProfileFragment";
 
     private Bitmap profPic;
@@ -76,9 +89,9 @@ public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.I
     private Bundle bundle;
     private MyRecyclerViewAdapter adapter;
     RecyclerView recyclerView;
-    private List<Bitmap> mData;
     private String mCurrentPhotoPath;
     Uri photoURI;
+    User mUser;
 
 
     private static final int NUM_OF_COLUMNS = 3;
@@ -96,7 +109,6 @@ public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.I
 
     private BottomNavigationView bottomNavigationView;
 
-    private StorageReference mStorageRef;
 
     private FloatingActionButton myFab;
 
@@ -113,46 +125,37 @@ public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.I
         bioText = view.findViewById(R.id.shortBio_profile);
         bottomNavigationView = view.findViewById(R.id.bottom_navigation);
         myFab = view.findViewById(R.id.fab);
+        db = FirebaseFirestore.getInstance();
 
         mContext = getActivity();
 
         setupFirebaseAuth();
         setupBottomNavigationView();
         configureCaptureButton();
-
-
+        setupGridView(this);
+        setProfileWidgets();
         recyclerView = view.findViewById(R.id.rvNumbers);
-
-        mData = new ArrayList<>();
-        Bitmap bitmap = null;
-
-        for (int i = 0; i < 100; i++) {
-
-            mData.add(bitmap);
-        }
-
-        // set up the RecyclerView
-        recyclerView.setLayoutManager(new GridLayoutManager(mContext, NUM_OF_COLUMNS, GridLayoutManager.VERTICAL, false));
-        adapter = new MyRecyclerViewAdapter(mContext, mData);
-
-        recyclerView.setAdapter(adapter);
-
-        adapter.setClickListener(this);
 
         return view;
     }
-
 
     @Override
     public void onItemClick(View view, int position) {
         Log.i("TAG", "You clicked number " + adapter.getItem(position) + ", which is at cell position " + position);
 
+        ViewPostFragment fragment = new ViewPostFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(getString(R.string.photo), adapter.getItem(position));
+        args.putInt(getString(R.string.activity_number), ACTIVITY_NUM);
+        fragment.setArguments(args);
+
+        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.container, fragment);
+        transaction.addToBackStack(getString(R.string.view_post_fragment));
+        transaction.commit();
+
     }
 
-    private void setProfileWidgets(User user) {
-
-
-    }
 
 
     /**
@@ -182,35 +185,117 @@ public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.I
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                 }
-                // ...
             }
 
         };
 
-//        if (mAuth.getUid() != null) {
-//
-//            Log.d(TAG, "setupFirebaseAuth: Getting document snapshot for user " + mAuth.getUid());
-//
-//            final DocumentReference docRef = db.collection("Users").document(mAuth.getUid());
-//            docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
-//                @Override
-//                public void onEvent(@javax.annotation.Nullable DocumentSnapshot documentSnapshot, @javax.annotation.Nullable FirebaseFirestoreException e) {
-//
-//                    if (e != null) {
-//                        Log.w(TAG, "Listen failed.", e);
-//                        return;
-//                    }
-//
-//                    if (documentSnapshot != null && documentSnapshot.exists()) {
-//                        Log.d(TAG, "Current data: " + documentSnapshot.getData());
-//                    } else {
-//                        Log.d(TAG, "Current data: null");
-//                    }
-//
-//                }
-//            });
+    }
 
-//        }
+
+    private void setupGridView(final ProfileFragment fragment) {
+        Log.d(TAG, "setupGridView: Setting up image grid.");
+
+        final ArrayList<Photo> photos = new ArrayList<>();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        Query query = db
+                .collection(getString(R.string.dbname_photos))
+                .whereEqualTo("user_id", FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+        query.get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+
+                            if (task.getResult() != null) {
+
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+
+                                    photos.add(document.toObject(Photo.class));
+                                }
+
+                                // Sort photos chronologically
+                                photos.sort(new Comparator<Photo>() {
+                                    @Override
+                                    public int compare(Photo o1, Photo o2) {
+
+                                        try {
+
+                                            Date o1_date = new SimpleDateFormat("yyyyMMdd_HHmmss").parse(o1.getDate_created());
+                                            Date o2_date = new SimpleDateFormat("yyyyMMdd_HHmmss").parse(o2.getDate_created());
+
+                                            int compare = o2_date.compareTo(o1_date);
+
+                                            return compare;
+
+                                        } catch (ParseException e) {
+                                            e.printStackTrace();
+                                            return 0;
+                                        }
+
+                                    }
+                                });
+
+
+                                // set up the RecyclerView
+                                recyclerView.setLayoutManager(new GridLayoutManager(mContext, NUM_OF_COLUMNS, GridLayoutManager.VERTICAL, false));
+                                adapter = new MyRecyclerViewAdapter(mContext, photos);
+
+                                recyclerView.setAdapter(adapter);
+
+                                adapter.setClickListener(fragment);
+
+
+                            }
+
+
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "onFailure: Failed to initialize the grid.");
+            }
+        });
+
+    }
+
+
+    private void setProfileWidgets() {
+
+
+        Log.d(TAG, "readSingleUser: " + mAuth.getCurrentUser().getUid());
+        DocumentReference userInfo = db.collection("Users").document(mAuth.getCurrentUser().getUid());
+        userInfo.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot doc = task.getResult();
+
+                    Log.d(TAG, "setProfileWidgets: Received user info: " + mUser);
+
+
+                    mUser = doc.toObject(User.class);
+
+                    GlideApp.with(mContext).load(mUser.getProfile_photo()).into(profilePic);
+
+                    usernameText.setText(mUser.getUsername());
+                    bioText.setText(mUser.getBio());
+
+
+                }
+            }
+        })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                    }
+                });
+
+
+
+
 
     }
 
@@ -230,7 +315,7 @@ public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.I
     private void setupBottomNavigationView() {
         Log.d(TAG, "setupBottomNavigationView: setting up BottomNavigationView");
         BottomNavigationViewHelper.setupBottomNavigationView(bottomNavigationView);
-        BottomNavigationViewHelper.enableNavigation(mContext, bottomNavigationView);
+        BottomNavigationViewHelper.enableNavigation(mContext, getActivity(), bottomNavigationView);
         Menu menu = bottomNavigationView.getMenu();
         MenuItem menuItem = menu.getItem(ACTIVITY_NUM);
         menuItem.setChecked(true);
@@ -253,13 +338,6 @@ public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.I
     /**
      * Camera
      */
-
-//    private void dispatchTakePictureIntent() {
-//        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//        if (takePictureIntent.resolveActivity(mContext.getPackageManager()) != null) {
-//            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-//        }
-//    }
 
 
     private void dispatchTakePictureIntent() {
@@ -316,6 +394,7 @@ public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.I
         });
     }
 
+
     // Retreive info from the camera
 
     @Override
@@ -328,6 +407,16 @@ public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.I
             try {
 
                 Intent intent = new Intent(mContext, NextActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+                try {
+                    getActivity().overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+
+                } catch (NullPointerException e) {
+
+                }
+
+
 
                 intent.putExtra(getString(R.string.selected_bitmap), photoURI);
                 mContext.startActivity((intent));

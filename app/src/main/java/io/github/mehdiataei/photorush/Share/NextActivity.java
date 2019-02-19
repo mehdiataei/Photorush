@@ -73,7 +73,6 @@ public class NextActivity extends AppCompatActivity {
     private Bitmap bitmap;
     private Switch toggle;
     private AutoHashtag hashtagGen;
-    private List<FirebaseVisionImageLabel> hashtagsInfo;
     private List<String> hashtags;
 
     Uri photoURI;
@@ -102,14 +101,6 @@ public class NextActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Log.d(TAG, "onClick: closing the activity");
                 finish();
-            }
-        });
-
-        TextView shareButton = findViewById(R.id.tvShare);
-        shareButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
             }
         });
 
@@ -245,7 +236,7 @@ public class NextActivity extends AppCompatActivity {
         };
 //
 
-        db.collection(getString(R.string.dbname_user_photos))
+        db.collection(getString(R.string.dbname_photos))
                 .whereEqualTo("user_id", FirebaseAuth.getInstance().getCurrentUser().getUid())
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -253,8 +244,9 @@ public class NextActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
                         if (task.isSuccessful()) {
-                            QuerySnapshot querySnapshot;
                             imageCount = mFirebaseMethods.getImageCount(task.getResult());
+
+                            Log.d(TAG, "onComplete: Number of images are:" + imageCount);
                         }
 
                     }

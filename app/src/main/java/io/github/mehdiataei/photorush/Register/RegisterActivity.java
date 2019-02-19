@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -36,6 +37,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import io.github.mehdiataei.photorush.Profile.ProfileActivity;
 import io.github.mehdiataei.photorush.R;
 
+import io.github.mehdiataei.photorush.Utils.FilePaths;
 import io.github.mehdiataei.photorush.Utils.FirebaseMethods;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -377,7 +379,8 @@ public class RegisterActivity extends AppCompatActivity {
 
 
                     //add new user to the database
-                    firebaseMethods.addNewUser(email, username, bio, "");
+                    firebaseMethods.addNewUser(email, username, bio);
+                    firebaseMethods.addThumbnail(imageBitmap, profilePic_taken);
 
                     Toast.makeText(mContext, "Signup successful. ", Toast.LENGTH_SHORT).show();
 
@@ -424,37 +427,5 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
 
-    private void addThumbnail() {
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        if (profilePic_taken) {
-            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        } else {
-
-            imageBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.thumbnail);
-        }
-
-        byte[] data = baos.toByteArray();
-
-
-        StorageReference thumbnailImagesRef = mStorageRef.child(userID + "/thumbnail.jpg");
-
-        UploadTask uploadTask = thumbnailImagesRef.putBytes(data);
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle unsuccessful uploads
-                Log.d(TAG, "onFailure: Thumbnail upload failed. ");
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-                // ...
-                Log.d(TAG, "onSuccess: Thumbnail uploaded. ");
-            }
-        });
-    }
 
 }

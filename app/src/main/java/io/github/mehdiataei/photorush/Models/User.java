@@ -7,6 +7,7 @@ public class User {
     private String email;
     private String username;
     private String bio;
+    private String profile_photo;
 
     public User(String user_id, String email, String username, String bio) {
         this.user_id = user_id;
@@ -51,6 +52,14 @@ public class User {
         this.username = username;
     }
 
+
+    public String getProfile_photo() {
+        return profile_photo;
+    }
+
+    public void setProfile_photo(String profile_photo) {
+        this.profile_photo = profile_photo;
+    }
 
     @Override
     public String toString() {
