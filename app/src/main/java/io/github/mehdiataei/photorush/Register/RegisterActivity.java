@@ -3,12 +3,10 @@ package io.github.mehdiataei.photorush.Register;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
+import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -19,25 +17,16 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
-import java.io.ByteArrayOutputStream;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import io.github.mehdiataei.photorush.Profile.ProfileActivity;
 import io.github.mehdiataei.photorush.R;
-
-import io.github.mehdiataei.photorush.Utils.FilePaths;
 import io.github.mehdiataei.photorush.Utils.FirebaseMethods;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -79,7 +68,7 @@ public class RegisterActivity extends AppCompatActivity {
                     //"(?=.*[0-9])" +         //at least 1 digit
                     //"(?=.*[a-z])" +         //at least 1 lower case letter
                     //"(?=.*[A-Z])" +         //at least 1 upper case letter
-                    "(?=.*[a-zA-Z])" +      //any letter
+                    //"(?=.*[a-zA-Z])" +      //any letter
                     //"(?=.*[@#$%^&+=])" +    //at least 1 special character
                     //"(?=\\S+$)" +           //no white spaces
                     ".{6,}" +               //at least 4 characters

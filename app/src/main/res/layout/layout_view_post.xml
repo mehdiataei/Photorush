@@ -93,7 +93,7 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/image_caption"
                     android:layout_marginTop="15dp"
-                    android:text="View all 3 comments"
+                    android:text="View all comments"
                     android:textColor="@color/grey"
                     android:textSize="18sp" />
 

@@ -23,7 +23,7 @@ public class AutoHashtag {
         image = FirebaseVisionImage.fromBitmap(bitmap);
         FirebaseVisionOnDeviceImageLabelerOptions options =
                 new FirebaseVisionOnDeviceImageLabelerOptions.Builder()
-                        .setConfidenceThreshold(0.5f)
+                        .setConfidenceThreshold(0.7f)
                         .build();
         labeler = FirebaseVision.getInstance()
                 .getOnDeviceImageLabeler(options);

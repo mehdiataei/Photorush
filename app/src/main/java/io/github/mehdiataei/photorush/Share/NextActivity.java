@@ -1,10 +1,8 @@
 package io.github.mehdiataei.photorush.Share;
 
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -27,9 +25,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.ml.vision.label.FirebaseVisionImageLabel;
 import com.google.firebase.storage.FirebaseStorage;
@@ -40,15 +36,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.github.mehdiataei.photorush.Profile.ProfileActivity;
 import io.github.mehdiataei.photorush.R;
 import io.github.mehdiataei.photorush.Utils.AutoHashtag;
 import io.github.mehdiataei.photorush.Utils.FirebaseMethods;
-
-import static android.support.constraint.Constraints.TAG;
-
-/**
- * Created by User on 7/24/2017.
- */
 
 public class NextActivity extends AppCompatActivity {
 
@@ -90,9 +81,6 @@ public class NextActivity extends AppCompatActivity {
         mStorageRef = FirebaseStorage.getInstance().getReference();
         db = FirebaseFirestore.getInstance();
 
-
-
-
         setupFirebaseAuth();
 
         ImageView backArrow = findViewById(R.id.ivBackArrow);
@@ -100,7 +88,8 @@ public class NextActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "onClick: closing the activity");
-                finish();
+                Intent intent = new Intent(NextActivity.this, ProfileActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -167,42 +156,6 @@ public class NextActivity extends AppCompatActivity {
         });
 
     }
-
-    private void someMethod() {
-        /*
-            Step 1)
-            Create a data model for Photos
-            Step 2)
-            Add properties to the Photo Objects (caption, date, imageUrl, photo_id, tags, user_id)
-            Step 3)
-            Count the number of photos that the user already has.
-            Step 4)
-            a) Upload the photo to Firebase Storage
-            b) insert into 'photos' node
-            c) insert into 'user_photos' node
-         */
-
-    }
-
-
-    /**
-     * gets the image url from the incoming intent and displays the chosen image
-     */
-//    private void setImage(){
-//        intent = getIntent();
-//        ImageView image = (ImageView) findViewById(R.id.imageShare);
-//
-//        if(intent.hasExtra(getString(R.string.selected_image))){
-//            imgUrl = intent.getStringExtra(getString(R.string.selected_image));
-//            Log.d(TAG, "setImage: got new image url: " + imgUrl);
-//            UniversalImageLoader.setImage(imgUrl, image, null, mAppend);
-//        }
-//        else if(intent.hasExtra(getString(R.string.selected_bitmap))){
-//            bitmap = (Bitmap) intent.getParcelableExtra(getString(R.string.selected_bitmap));
-//            Log.d(TAG, "setImage: got new bitmap");
-//            image.setImageBitmap(bitmap);
-//        }
-//    }
 
      /*
      ------------------------------------ Firebase ---------------------------------------------

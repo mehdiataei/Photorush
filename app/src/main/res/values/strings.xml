@@ -51,6 +51,7 @@
     <string name="field_comments">field_comments</string>
     <string name="dbname_comments">comments</string>
     <string name="field_photo_id">photo_id</string>
+    <string name="feed_fragment">feed_fragment</string>
 
 
 </resources>

@@ -1,25 +1,19 @@
 package io.github.mehdiataei.photorush.Utils;
 
 import android.app.Activity;
-import android.util.Log;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.util.Log;
 import android.view.MenuItem;
-
-//import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 
 import com.google.firebase.auth.FirebaseAuth;
 
+import io.github.mehdiataei.photorush.Feed.FeedActivity;
 import io.github.mehdiataei.photorush.Profile.ProfileActivity;
 import io.github.mehdiataei.photorush.R;
-import io.github.mehdiataei.photorush.Feed.FeedActivity;
 
-
-/**
- * Created by User on 5/28/2017.
- */
 
 public class BottomNavigationViewHelper {
 

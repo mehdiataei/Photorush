@@ -1,12 +1,8 @@
 package io.github.mehdiataei.photorush.Profile;
 
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -26,10 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -39,17 +32,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
@@ -57,7 +44,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 import io.github.mehdiataei.photorush.Login.LoginActivity;
@@ -66,27 +52,20 @@ import io.github.mehdiataei.photorush.Models.User;
 import io.github.mehdiataei.photorush.R;
 import io.github.mehdiataei.photorush.Share.NextActivity;
 import io.github.mehdiataei.photorush.Utils.BottomNavigationViewHelper;
-import io.github.mehdiataei.photorush.Utils.FirebaseMethods;
 import io.github.mehdiataei.photorush.Utils.GlideApp;
 import io.github.mehdiataei.photorush.Utils.MyRecyclerViewAdapter;
 
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 
-/**
- * Created by User on 6/29/2017.
- */
 
 public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.ItemClickListener {
 
 
     private static final String TAG = "ProfileFragment";
 
-    private Bitmap profPic;
     private ImageView profilePic;
     private TextView usernameText, bioText;
-    private String userID;
-    private Bundle bundle;
     private MyRecyclerViewAdapter adapter;
     RecyclerView recyclerView;
     private String mCurrentPhotoPath;
@@ -113,7 +92,6 @@ public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.I
     private FloatingActionButton myFab;
 
     static final int REQUEST_IMAGE_CAPTURE = 2;
-    Bitmap lastImage;
 
     @Nullable
     @Override
@@ -124,17 +102,16 @@ public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.I
         usernameText = view.findViewById(R.id.username_text);
         bioText = view.findViewById(R.id.shortBio_profile);
         bottomNavigationView = view.findViewById(R.id.bottom_navigation);
+        recyclerView = view.findViewById(R.id.rvNumbers);
+
         myFab = view.findViewById(R.id.fab);
         db = FirebaseFirestore.getInstance();
 
         mContext = getActivity();
 
-        setupFirebaseAuth();
+        setupFirebaseAuth(this);
         setupBottomNavigationView();
         configureCaptureButton();
-        setupGridView(this);
-        setProfileWidgets();
-        recyclerView = view.findViewById(R.id.rvNumbers);
 
         return view;
     }
@@ -162,7 +139,7 @@ public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.I
      * Firebase Auth setup
      */
 
-    private void setupFirebaseAuth() {
+    private void setupFirebaseAuth(final ProfileFragment fragment) {
         Log.d(TAG, "setupFirebaseAuth: setting up firebase auth.");
 
         mAuth = FirebaseAuth.getInstance();
@@ -178,6 +155,10 @@ public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.I
                 if (user != null) {
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+
+
+                    setupGridView(fragment);
+                    setProfileWidgets();
 
 
                 } else {
@@ -200,7 +181,7 @@ public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.I
 
         Query query = db
                 .collection(getString(R.string.dbname_photos))
-                .whereEqualTo("user_id", FirebaseAuth.getInstance().getCurrentUser().getUid());
+                .whereEqualTo("user_id", mAuth.getCurrentUser().getUid());
 
         query.get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -264,8 +245,6 @@ public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.I
 
     private void setProfileWidgets() {
 
-
-        Log.d(TAG, "readSingleUser: " + mAuth.getCurrentUser().getUid());
         DocumentReference userInfo = db.collection("Users").document(mAuth.getCurrentUser().getUid());
         userInfo.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -320,6 +299,7 @@ public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.I
         MenuItem menuItem = menu.getItem(ACTIVITY_NUM);
         menuItem.setChecked(true);
     }
+
 
     @Override
     public void onStart() {
@@ -415,8 +395,6 @@ public class ProfileFragment extends Fragment implements MyRecyclerViewAdapter.I
                 } catch (NullPointerException e) {
 
                 }
-
-
 
                 intent.putExtra(getString(R.string.selected_bitmap), photoURI);
                 mContext.startActivity((intent));

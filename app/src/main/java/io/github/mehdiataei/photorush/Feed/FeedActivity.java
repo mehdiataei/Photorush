@@ -1,50 +1,63 @@
 package io.github.mehdiataei.photorush.Feed;
 
-
-import android.content.Context;
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.TextView;
 
-//import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
-
+import io.github.mehdiataei.photorush.Models.Photo;
+import io.github.mehdiataei.photorush.Profile.ViewCommentsFragment;
+import io.github.mehdiataei.photorush.Profile.ViewPostFragment;
 import io.github.mehdiataei.photorush.R;
-import io.github.mehdiataei.photorush.Utils.BottomNavigationViewHelper;
 
-public class FeedActivity extends AppCompatActivity {
-    private static final String TAG = "FeedActivity";
-    private static final int ACTIVITY_NUM = 1;
+public class FeedActivity extends AppCompatActivity implements ViewPostFragment.OnCommentThreadSelectedListener {
 
-    private Context mContext = FeedActivity.this;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCommentThreadSelectedListener(Photo photo) {
+
+        ViewCommentsFragment fragment = new ViewCommentsFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(getString(R.string.photo), photo);
+        fragment.setArguments(args);
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.container, fragment);
+        transaction.addToBackStack(getString(R.string.view_comments_fragment));
+        transaction.commit();
+
+
+    }
+
+    private static final String TAG = "ProfileActivity";
+    private ImageView profilePic;
+    private TextView usernameText, bioText;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_feed);
-        Log.d(TAG, "onCreate: started.");
+        setContentView(R.layout.activity_profile);
 
-        setupBottomNavigationView();
+        profilePic = findViewById(R.id.profile_picture);
+        usernameText = findViewById(R.id.username_text);
+        bioText = findViewById(R.id.shortBio_profile);
 
+        init();
     }
 
-    /**
-     * BottomNavigationView setup
-     */
-    private void setupBottomNavigationView() {
-        Log.d(TAG, "setupBottomNavigationView: setting up BottomNavigationView");
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        BottomNavigationViewHelper.setupBottomNavigationView(bottomNavigationView);
-        BottomNavigationViewHelper.enableNavigation(mContext, this, bottomNavigationView);
-        Menu menu = bottomNavigationView.getMenu();
-        MenuItem menuItem = menu.getItem(ACTIVITY_NUM);
-        menuItem.setChecked(true);
+    private void init() {
+        Log.d(TAG, "init: inflating " + getString(R.string.feed_fragment));
+
+        FeedFragment fragment = new FeedFragment();
+        FragmentTransaction transaction = FeedActivity.this.getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.container, fragment);
+        transaction.addToBackStack(getString(R.string.profile_fragment));
+        transaction.commit();
     }
+
+
 }
-
-
 
 

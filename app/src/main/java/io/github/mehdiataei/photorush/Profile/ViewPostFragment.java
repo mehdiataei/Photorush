@@ -3,14 +3,11 @@ package io.github.mehdiataei.photorush.Profile;
 
 import android.content.Context;
 import android.content.Intent;
-import android.media.Image;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,11 +18,12 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -35,18 +33,15 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import io.github.mehdiataei.photorush.Login.LoginActivity;
+import io.github.mehdiataei.photorush.Models.Photo;
 import io.github.mehdiataei.photorush.Models.User;
 import io.github.mehdiataei.photorush.R;
 import io.github.mehdiataei.photorush.Utils.BottomNavigationViewHelper;
-import io.github.mehdiataei.photorush.Utils.GlideApp;
-import io.github.mehdiataei.photorush.Utils.MyRecyclerViewAdapter;
-import io.github.mehdiataei.photorush.Utils.SquareImageView;
 import io.github.mehdiataei.photorush.Utils.GlideImageLoader;
-import io.github.mehdiataei.photorush.Models.Photo;
+import io.github.mehdiataei.photorush.Utils.SquareImageView;
 
 
 public class ViewPostFragment extends Fragment {
-
 
     public interface OnCommentThreadSelectedListener {
         void onCommentThreadSelectedListener(Photo photo);
@@ -66,7 +61,7 @@ public class ViewPostFragment extends Fragment {
     private SquareImageView mPostImage;
     private BottomNavigationView bottomNavigationView;
     private TextView mBackLabel, mCaption, mUsername;
-    private ImageView mBackArrow, mProfileImage;
+    private ImageView mBackArrow, ivDelete, mProfileImage;
     private ProgressBar mProgressbar;
     private Context mContext;
     private User mUser;
@@ -76,6 +71,8 @@ public class ViewPostFragment extends Fragment {
     // Firebase
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+    private FirebaseFirestore db;
+
 
     //vars
     private Photo mPhoto;
@@ -94,6 +91,11 @@ public class ViewPostFragment extends Fragment {
         mProfileImage = view.findViewById(R.id.profile_photo);
         mProgressbar = view.findViewById(R.id.view_post_progressbar);
         mCommentsLink = view.findViewById(R.id.image_comments_link);
+        ivDelete = view.findViewById(R.id.ivDelete);
+        mContext = getActivity();
+
+        ivDelete.setVisibility(View.GONE);
+
 
         try {
             mPhoto = getPhotoFromBundle();
@@ -188,8 +190,6 @@ public class ViewPostFragment extends Fragment {
     private void getPhotoDetails() {
         Log.d(TAG, "getPhotoDetails: Retrieving photo details.");
 
-        //final ArrayList<User> user = new ArrayList<>();
-
         mCaption.setText(mPhoto.getCaption());
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -228,8 +228,47 @@ public class ViewPostFragment extends Fragment {
 
     private void setupWidgets() {
 
-        GlideApp.with(getActivity()).load(mUser.getProfile_photo()).into(mProfileImage);
+        Glide.with(getActivity()).load(mUser.getProfile_photo()).into(mProfileImage);
         mUsername.setText(mUser.getUsername());
+
+        if (mAuth.getCurrentUser().getUid().equals(mPhoto.getUser_id())) {
+
+            ivDelete.setVisibility(View.VISIBLE);
+
+
+            ivDelete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    db = FirebaseFirestore.getInstance();
+
+                    db.collection(mContext.getString(R.string.dbname_photos)).document(mPhoto.getPhoto_id()).delete()
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d(TAG, "DocumentSnapshot successfully deleted!");
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w(TAG, "Error deleting document", e);
+                                }
+                            }).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            Intent intent = new Intent(mContext, ProfileActivity.class);
+                            startActivity(intent);
+                        }
+                    });
+
+                }
+            });
+        } else {
+
+
+        }
+
     }
 
     /**

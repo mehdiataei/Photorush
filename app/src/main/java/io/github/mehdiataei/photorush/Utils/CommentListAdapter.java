@@ -10,15 +10,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -27,9 +23,8 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import io.github.mehdiataei.photorush.Models.User;
-import io.github.mehdiataei.photorush.R;
 import io.github.mehdiataei.photorush.Models.Comment;
+import io.github.mehdiataei.photorush.R;
 
 
 public class CommentListAdapter extends ArrayAdapter<Comment> {

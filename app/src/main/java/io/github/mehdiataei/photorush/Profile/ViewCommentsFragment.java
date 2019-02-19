@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,9 +40,6 @@ import io.github.mehdiataei.photorush.Models.Photo;
 import io.github.mehdiataei.photorush.R;
 import io.github.mehdiataei.photorush.Utils.CommentListAdapter;
 
-/**
- * Created by User on 8/12/2017.
- */
 
 public class ViewCommentsFragment extends Fragment {
 
@@ -58,7 +54,7 @@ public class ViewCommentsFragment extends Fragment {
     //vars
     private Photo mPhoto;
     private ArrayList<Comment> mComments;
-    ImageView mBackButton, mCheckmark;
+    ImageView mBackArrow, mCheckmark;
     private ListView mListView;
     TextView mComment;
 
@@ -75,7 +71,7 @@ public class ViewCommentsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_view_comments, container, false);
 
-        mBackButton = view.findViewById(R.id.ivBackArrow);
+//        mBackArrow = view.findViewById(R.id.backArrow);
         mCheckmark = view.findViewById(R.id.ivPostComment);
         mListView = view.findViewById(R.id.listView);
         db = FirebaseFirestore.getInstance();
@@ -119,17 +115,13 @@ public class ViewCommentsFragment extends Fragment {
                 }
             }
         });
-//
+
 //        mBackArrow.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View v) {
-//                Log.d(TAG, "onClick: navigating back");
-//                if(getCallingActivityFromBundle().equals(getString(R.string.home_activity))){
-//                    getActivity().getSupportFragmentManager().popBackStack();
-//                    ((HomeActivity)getActivity()).showLayout();
-//                }else{
-//                    getActivity().getSupportFragmentManager().popBackStack();
-//                }
+//
+//
+//
 //
 //            }
 //        });
